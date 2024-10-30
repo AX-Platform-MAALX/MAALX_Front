@@ -28,7 +28,7 @@ const LogoTitle = styled.div`
 `;
 
 const LogoImage = styled.img`
-  width: 13vw;
+  width: 15vw;
   height: auto;
 `;
 
