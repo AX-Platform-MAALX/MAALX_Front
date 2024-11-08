@@ -1,17 +1,16 @@
-import logo from './logo.svg';
-import './App.css';
-import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import HomePage from "./pages/Homepage";
+import React from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BaseLine } from './components/atoms';
 
-function App() {
-  return (
-    <Router>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-          </Routes>
-    </Router>
-  );
-}
-
-export default App;
+export const App = () => {
+	return (
+		<>
+			<BaseLine />
+			<BrowserRouter>
+				<Routes>
+					<Route path="/" element={<>hi</>} />
+				</Routes>
+			</BrowserRouter>
+		</>
+	);
+};
