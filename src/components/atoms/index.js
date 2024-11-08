@@ -1,1 +1,1 @@
-export { BaseLine } from './BaseLine';
+export { BaseLine } from './BaseLine.jsx';
