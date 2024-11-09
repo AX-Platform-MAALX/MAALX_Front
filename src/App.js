@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { Wrapper } from './components/organisms/index.js';
 import { BaseLine } from './components/atoms/index.js';
 
 export const App = () => {
@@ -7,9 +8,11 @@ export const App = () => {
 		<>
 			<BaseLine />
 			<BrowserRouter>
-				<Routes>
-					<Route path="/" element={<>hi</>} />
-				</Routes>
+				<Wrapper>
+					<Routes>
+						<Route path="/" element={<>hi</>} />
+					</Routes>
+				</Wrapper>
 			</BrowserRouter>
 		</>
 	);
