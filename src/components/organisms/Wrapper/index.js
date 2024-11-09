@@ -8,7 +8,7 @@ export const Wrapper = ({ children }) => {
 	return (
 		<Container maxWidth={false} disableGutters>
 			<Header />
-			<Stack component="main" py={theme.spacing(4)} sx={{ height: 'calc(100vh - 256px)' }}>
+			<Stack component="main" py={theme.spacing(4)} sx={{ height: 'calc(100vh)' }}>
 				{children}
 			</Stack>
 			<Footer />
