@@ -2,6 +2,7 @@ import { Stack, useTheme } from '@mui/system';
 import { Button, Text } from '../atoms/index.js';
 import styled from '@emotion/styled';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';  // useNavigate 임포트
 
 const Input = styled.input`
     padding: 8px 12px;
@@ -51,9 +52,57 @@ const RequiredMark = styled.span`
 
 export const SignUp = () => {
     const theme = useTheme();
+    const navigate = useNavigate();  // useNavigate 훅 사용
+    const [formData, setFormData] = useState({
+        email: "",
+        nickname: "",
+        password: ""
+    });
     const [selectedPlan, setSelectedPlan] = useState('Basic');
+    const [errorMessage, setErrorMessage] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+    
+        // formData가 올바르게 설정되었는지 확인
+        console.log(formData); // formData 확인
+    
+        try {
+            const response = await fetch("http://localhost:8080/user/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email: formData.email,
+                    nickname: formData.nickname,
+                    password: formData.password
+                })
+            });
+    
+            const data = await response.json();
+    
+            if (response.ok) {
+                setSuccessMessage(data.message);
+                setErrorMessage('');
+                navigate('/login');  // 로그인 페이지로 이동
+            } else {
+                setErrorMessage(data.message);
+                setSuccessMessage('');
+            }
+        } catch (error) {
+            console.error("에러:", error);
+            setErrorMessage('서버와의 연결에 실패했습니다.');
+        }
+    };    
     
     return (
+        <form onSubmit={handleSubmit} style={{ width: '100%' }}>
         <Stack 
             spacing={theme.spacing(3)} 
             alignItems="center"
@@ -67,16 +116,31 @@ export const SignUp = () => {
             <Stack spacing={theme.spacing(3)} sx={{ width: '100%' }}>
                 <Stack spacing={1}>
                     <Text>이메일<RequiredMark>*</RequiredMark></Text>
-                    <Input placeholder="사용하실 이메일을 입력해주세요" />
-                </Stack>
+                    <Input 
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        placeholder="사용하실 이메일을 입력해주세요" 
+                    />                </Stack>
                 <Stack spacing={1}>
                     <Text>비밀번호<RequiredMark>*</RequiredMark></Text>
-                    <Input type="password" placeholder="사용하실 비밀번호를 입력해주세요" />
-                </Stack>
+                    <Input 
+                        type="password" 
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        placeholder="사용하실 비밀번호를 입력해주세요" 
+                    />                </Stack>
                 <Stack spacing={1}>
                     <Text>이름<RequiredMark>*</RequiredMark></Text>
-                    <Input placeholder="가입하시는 분의 성함을 입력해주세요" />
-                </Stack>
+                    <Input 
+                        type="text"
+                        name="nickname"
+                        value={formData.nickname}
+                        onChange={handleChange}
+                        placeholder="가입하시는 분의 성함을 입력해주세요" 
+                    />                </Stack>
                 <Stack spacing={1}>
                     <Text>요금제 선택<RequiredMark>*</RequiredMark></Text>
                     <RadioGroup>
@@ -109,6 +173,7 @@ export const SignUp = () => {
                 </Stack>
             </Stack>
             <Button 
+                type="submit"
                 style={{ 
                     width: '100%', 
                     borderRadius: '4px', 
@@ -123,6 +188,7 @@ export const SignUp = () => {
                 회원가입
             </Button>
         </Stack>
+    </form>
     );
 };
 
