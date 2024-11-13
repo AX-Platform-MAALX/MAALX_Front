@@ -2,35 +2,70 @@ import { Stack, useTheme } from '@mui/system';
 import { useNavigate, Link } from 'react-router-dom';
 import { Logo, TextButton, Button } from '../../atoms/index.js';
 import { useState, useEffect } from 'react';
+import styled from "styled-components";
 
+const DropdownMenu = styled.div`
+  position: absolute;
+  top: 90px;
+  right: 80px;
+  background-color: white;
+  border: 0.1vw solid #ccc;
+  border-radius: 1.5vw;
+  overflow: hidden;
+  z-index: 1; /* z-index를 높여 다른 요소 위에 나타나도록 설정 */
+  box-shadow: 0 0.2vw 1vw rgba(0, 0, 0, 0.1);
+  display: ${({ isOpen }) => (isOpen ? 'block' : 'none')};
+`;
+
+const DropdownItem = styled(Link)`
+  display: block;
+  padding: 1vw 1.5vw;
+  color: #333;
+  font-size: 15px;
+  text-decoration: none;
+  white-space: nowrap;
+  border-bottom: 0.1vw solid #e0e0e0;
+  text-align: center;
+  &:hover {
+    background-color: #f0f0f0;
+  }
+`;
 export const Header = () => {
 	const theme = useTheme();
 	const navigate = useNavigate();
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [userName, setUserName] = useState('');
-    const [profileImage, setProfileImage] = useState(''); // 프로필 이미지 URL 상태
-	
-	useEffect(() => {
-        // 로그인 여부와 사용자 정보 확인
-        const token = localStorage.getItem('token');
-        if (token) {
-            setIsLoggedIn(true);
-            // 사용자 이름 및 프로필 이미지 설정
-            const user = JSON.parse(localStorage.getItem('user')); // 예시로 로컬 스토리지에 저장된 사용자 정보 가져오기
-            setUserName(user ? user.nickname : '');
-            setProfileImage(user ? user.profileImage : ''); // 프로필 이미지 URL 설정
-        }
-    }, []);
+	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+	useEffect(() => {
+		const token = localStorage.getItem('token');
+		if (token) {
+		  setIsLoggedIn(true);
+		  const user = JSON.parse(localStorage.getItem('user'));
+		  console.log(user);  // user 값이 제대로 로드되는지 확인
+		  setUserName(user ? user.nickname : '');
+		} else {
+		  setIsLoggedIn(false);
+		}
+	  });  // 빈 배열을 전달하여 처음 렌더링될 때만 실행되도록 설정
+	
 	const handleLocationClick = (path) => () => {
 		navigate(path);
 	};
 	const handleProfileClick = () => {
-        navigate('/profile');  // 프로필 페이지로 이동
+		setIsDropdownOpen((prev) => !prev);  // 상태 토글
     };
+	const handleLogout = () => {
+		localStorage.clear();
+		setIsLoggedIn(false); // 로그아웃 후 로그인 상태 변경
+		setUserName(''); // 사용자 이름 초기화
+		navigate("/"); // 홈으로 리다이렉트
+		window.location.reload();
+	  };
+	  
 	return (
 		<Stack
-			compoennt="header"
+			component="header"
 			direction="row"
 			justifyContent="space-between"
 			px={theme.spacing(2)}
@@ -59,19 +94,25 @@ export const Header = () => {
 						cursor: 'pointer' 
 					}}
 					onClick={handleLocationClick('/consulting')}>컨설팅</TextButton>
-				{isLoggedIn ? (
-                    <Stack direction="row" alignItems="center">
-                        <img 
-                            src={'images/profile.png'} // 기본 프로필 이미지 경로 지정
-                            alt="Profile"
-                            style={{ marginTop: '30px', marginRight: '100px', // 프로필 이미지를 왼쪽으로 살짝 이동
-								width: '45px', height: '45px', borderRadius: '50%', cursor: 'pointer' }}
-                            onClick={handleProfileClick} 
-                        />
-                    </Stack>
-                ) : (
-                    <Button onClick={handleLocationClick('/login')}>Login</Button>
-                )}			
+					{isLoggedIn ? (
+					<Stack direction="row" alignItems="center">
+						<img 
+						src={'images/profile.png'} 
+						alt="Profile"
+						style={{ marginTop: '30px', marginRight: '100px', width: '45px', height: '45px', borderRadius: '50%', cursor: 'pointer' }}
+						onClick={handleProfileClick} 
+						/>
+						<DropdownMenu isOpen={isDropdownOpen}>
+						<DropdownItem to="/mypage">My Page</DropdownItem>
+						<DropdownItem onClick={handleLogout}>로그아웃</DropdownItem>
+						</DropdownMenu>
+					</Stack>
+					) : (
+					<Button
+						style={{ marginTop: '32px', marginRight: '100px', fontSize: '15px', width: '80px', height: '45px', cursor: 'pointer' }} 
+						onClick={handleLocationClick('/login')}>Login</Button>
+					)}
+		
 			</Stack>
 		</Stack>
 	);
