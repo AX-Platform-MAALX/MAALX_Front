@@ -68,27 +68,27 @@ export const Header = () => {
 			component="header"
 			direction="row"
 			justifyContent="space-between"
-			px={theme.spacing(2)}
-			sx={{ height: '100px' }}
+			px={theme.spacing(20)}
+			sx={{ height: '130px' }}
 		>
 			<Link to="/">
 				<Logo />
 			</Link>
-			<Stack direction="row" spacing={theme.spacing(6)} alignItems="center">
+			<Stack direction="row" spacing={theme.spacing(5)} alignItems="center" >
 				<TextButton 
 					style={{
-						marginTop: '17px',
-						fontSize: '25px',
+						marginTop: '24px',
+						fontSize: '23px',
 						width: '160px', // 프로필 이미지 크기 키움
 						height: '10px', // 프로필 이미지 크기 키움
 						cursor: 'pointer' 
 					}}
-					onClick={handleLocationClick('/service-info')}>서비스 안내</TextButton>
+					onClick={handleLocationClick('/')}>서비스 안내</TextButton>
 				<TextButton 
 					style={{
-						marginTop: '17px',
+						marginTop: '24px',
 						marginRight: '10px',
-						fontSize: '25px',
+						fontSize: '23px',
 						width: '80px', // 프로필 이미지 크기 키움
 						height: '10px', // 프로필 이미지 크기 키움
 						cursor: 'pointer' 
@@ -99,7 +99,7 @@ export const Header = () => {
 						<img 
 						src={'images/profile.png'} 
 						alt="Profile"
-						style={{ marginTop: '30px', marginRight: '100px', width: '45px', height: '45px', borderRadius: '50%', cursor: 'pointer' }}
+						style={{ marginTop: '30px', marginRight: '110px', width: '45px', height: '45px', borderRadius: '50%', cursor: 'pointer' }}
 						onClick={handleProfileClick} 
 						/>
 						<DropdownMenu isOpen={isDropdownOpen}>
