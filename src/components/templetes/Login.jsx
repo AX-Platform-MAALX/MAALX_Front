@@ -56,6 +56,10 @@ export const Login = () => {
             setErrorMessage('서버와의 연결에 실패했습니다.');
         }
     };
+    const handleLoginSuccess = () => {
+        localStorage.setItem('isLoggedIn', 'true');
+        navigate('/');
+    };
     return (
         <Stack 
             spacing={theme.spacing(2)} 

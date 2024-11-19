@@ -29,6 +29,9 @@ const DropdownItem = styled(Link)`
   &:hover {
     background-color: #f0f0f0;
   }
+  &:last-child {
+    border-bottom: none;
+  }
 `;
 export const Header = () => {
 	const theme = useTheme();
@@ -103,8 +106,9 @@ export const Header = () => {
 						onClick={handleProfileClick} 
 						/>
 						<DropdownMenu isOpen={isDropdownOpen}>
-						<DropdownItem to="/mypage">My Page</DropdownItem>
-						<DropdownItem onClick={handleLogout}>로그아웃</DropdownItem>
+						<DropdownItem to="/mypage">마이페이지</DropdownItem>
+						<DropdownItem to="/consulting-history">컨설팅 기록</DropdownItem>
+						<DropdownItem as="div" onClick={handleLogout}>로그아웃</DropdownItem>
 						</DropdownMenu>
 					</Stack>
 					) : (
