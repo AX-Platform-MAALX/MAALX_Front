@@ -1,13 +1,13 @@
 import { Stack, useTheme } from '@mui/system';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation} from 'react-router-dom';
 import { Logo, TextButton, Button } from '../../atoms/index.js';
 import { useState, useEffect } from 'react';
 import styled from "styled-components";
 
 const DropdownMenu = styled.div`
   position: absolute;
-  top: 90px;
-  right: 80px;
+  top: 105px;
+  right: 210px;
   background-color: white;
   border: 0.1vw solid #ccc;
   border-radius: 1.5vw;
@@ -33,6 +33,7 @@ const DropdownItem = styled(Link)`
 export const Header = () => {
 	const theme = useTheme();
 	const navigate = useNavigate();
+	const location = useLocation(); // 현재 경로 가져오기
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [userName, setUserName] = useState('');
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -81,7 +82,9 @@ export const Header = () => {
 						fontSize: '23px',
 						width: '160px', // 프로필 이미지 크기 키움
 						height: '10px', // 프로필 이미지 크기 키움
-						cursor: 'pointer' 
+						cursor: 'pointer',
+						fontFamily: "'MPLUSRounded1c', sans-serif",  // 원하는 폰트 적용
+						color: location.pathname === '/' ? '#2F56C7' : '#333', // 경로에 따라 색상 변경
 					}}
 					onClick={handleLocationClick('/')}>서비스 안내</TextButton>
 				<TextButton 
@@ -91,9 +94,11 @@ export const Header = () => {
 						fontSize: '23px',
 						width: '80px', // 프로필 이미지 크기 키움
 						height: '10px', // 프로필 이미지 크기 키움
-						cursor: 'pointer' 
+						cursor: 'pointer',
+						fontFamily: "'MPLUSRounded1c', sans-serif",  // 원하는 폰트 적용
+						color: location.pathname === '/service-info' ? '#2F56C7' : '#333', // 경로에 따라 색상 변경
 					}}
-					onClick={handleLocationClick('/consulting')}>컨설팅</TextButton>
+					onClick={handleLocationClick('/service-info')}>컨설팅</TextButton>
 					{isLoggedIn ? (
 					<Stack direction="row" alignItems="center">
 						<img 
@@ -104,6 +109,7 @@ export const Header = () => {
 						/>
 						<DropdownMenu isOpen={isDropdownOpen}>
 						<DropdownItem to="/mypage">My Page</DropdownItem>
+						<DropdownItem to="/mypage">컨설팅 기록</DropdownItem>
 						<DropdownItem onClick={handleLogout}>로그아웃</DropdownItem>
 						</DropdownMenu>
 					</Stack>
