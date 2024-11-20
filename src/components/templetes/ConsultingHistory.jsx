@@ -70,10 +70,8 @@ export const ConsultingHistory = () => {
   const [consultingHistory, setConsultingHistory] = useState([]);
 
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
     const token = localStorage.getItem('token');
-    
-    if (!isLoggedIn || !token) {
+    if (!token) {
       navigate('/login');
       return;
     }

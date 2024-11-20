@@ -17,7 +17,7 @@ export const Home = () => {
 				style={{
 					width:'500px',
 					position: 'absolute', // 이미지를 기준으로 위치 고정
-					top: '72%', // 상단에서의 거리
+					top: '67%', // 상단에서의 거리
 					left: '30%', // 왼쪽에서의 거리
 					transform: 'translate(-50%, -50%)', // 가운데 정렬
 					color: 'white', // 글자색 (이미지에 따라 변경 가능)
