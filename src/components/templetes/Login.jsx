@@ -9,6 +9,7 @@ const Input = styled.input`
     border: 1px solid #ccc;
     border-radius: 4px;
     width: 100%;
+    font-size: 16px;
 `;
 
 export const Login = () => {
@@ -43,7 +44,7 @@ export const Login = () => {
             if (response.ok) {
                 // 로그인 성공 시 JWT 토큰 저장
                 localStorage.setItem("token", data.token);  // JWT를 localStorage에 저장
-                localStorage.setItem('user', JSON.stringify({ nickname: data.nickname, userId: data.userId }));  // 이메일, 닉네임만 저장
+                localStorage.setItem('user', JSON.stringify({ nickname: data.nickname, userId: data.userId, isPremium: data.isPremium}));  // 이메일, 닉네임만 저장
                 setErrorMessage('');
                 const userName = data.nickname || "사용자";
                 console.log(`${userName}님 로그인 성공했습니다`);  // 성공 메시지 출력
@@ -70,12 +71,12 @@ export const Login = () => {
                 padding: theme.spacing(2)
             }}
         >
-            <Text bold>로그인</Text>
+            <Text bold style={{fontSize:'24px',marginBottom:'20px'}}>로그인</Text>
             <Stack spacing={theme.spacing(1)} sx={{ width: '100%' }}>
                 <Input 
                     name="email"
                     type="email"
-                    placeholder="아이디"
+                    placeholder="이메일"
                     value={formData.email}
                     onChange={handleChange}
                 />                
@@ -87,13 +88,15 @@ export const Login = () => {
                     onChange={handleChange}
                 />            
             </Stack>
-            <Button style={{ width: '100%' }} onClick={handleSubmit}>로그인</Button>
+            <Button style={{ width: '100%',fontSize:'16px' }} onClick={handleSubmit}>로그인</Button>
             <Text 
-                onClick={() => navigate('/signup')} 
-                style={{ cursor: 'pointer' }}
+                style={{ cursor: 'pointer',fontSize:'17px' }}
+                onClick={() => navigate('/signup')}
             >
-                MAALX가 처음이시라면 회원가입
+                MAALX가 처음이시라면{' '}
+                <span style={{ color: '#2F56C7'}}>회원가입</span>
             </Text>
+
         </Stack>
     );
 };

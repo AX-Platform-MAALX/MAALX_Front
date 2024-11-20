@@ -3,6 +3,7 @@ import { Text } from '../atoms/index.js';
 import styled from '@emotion/styled';
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, Line, Legend } from 'recharts';
+import Modal from 'react-modal';  // 모달 임포트
 
 const ProfileSection = styled.div`
   background-color: white;
@@ -88,12 +89,42 @@ const ViewButton = styled.button`
   padding: 8px 16px;
   cursor: pointer;
 `;
-
+const RadioGroup = styled.div`
+    display: flex;
+    gap: 12px;
+    width: 100%;
+`;
+const PlanCard = styled.label`
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    border: 2px solid ${props => props.checked ? '#2f56c7' : '#eee'};
+    border-radius: 8px;
+    cursor: pointer;
+    flex: 1;
+    position: relative;
+    background-color: #fff;
+    
+    input {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+    }
+`;
+const PriceText = styled(Text)`
+    color: #FF6B00;
+    margin: 8px 0;
+    font-weight: bold;
+    font-size: 18px;
+`;
 export const MyPage = () => {
   const theme = useTheme();
+  const jwtToken = localStorage.getItem('token');
   const [userData, setUserData] = useState(null);
-  const [consultingStats] = useState({
-    total: 4,
+  const [modalIsOpen, setModalIsOpen] = useState(false);  // 모달 상태 관리
+  const [selectedPlan, setSelectedPlan] = useState('Basic'); // 기본값은 'Basic'으로 설정
+  const [consultingStats,setConsultingStats] = useState({
+    total: 0,
     completed: 4,
     inProgress: 0
   });
@@ -101,8 +132,71 @@ export const MyPage = () => {
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user'));
     setUserData(user);
+    fetchInfoCount(user.userId); 
+    if (user?.isPremium) {
+      setSelectedPlan('Pro');
+    } else {
+      setSelectedPlan('Basic');
+    }
   }, []);
 
+  const fetchInfoCount = async (userId) => {
+    try {
+      if (!userId) throw new Error('사용자 ID를 찾을 수 없습니다');
+      console.log(userId);
+      const response = await fetch('http://localhost:8080/user/additional/count', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${jwtToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId }), // userId를 요청 본문에 담아서 전송
+      });
+
+      if (!response.ok) {
+        throw new Error('총 개수를 가져오는 데 실패했습니다');
+      }
+
+      const data = await response.json();
+      setConsultingStats((prevStats) => ({
+        ...prevStats,
+        total: data.count // Update the total count here
+      }));
+      } catch (err) {
+        console.error(err.message);
+      }
+  };
+  const handlePlanChange = async (plan) => {
+    setSelectedPlan(plan);
+    const isPremium = plan === 'Pro';
+    console.log(isPremium);
+    try {
+      const response = await fetch('http://localhost:8080/user/upgrade', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${jwtToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isPremium }),
+      });
+      if (!response.ok) {
+        throw new Error('회원 상태 변경에 실패했습니다');
+      }
+      const data = await response.json();
+      console.log('회원 상태 변경 성공:', data);
+    } catch (error) {
+      console.error('회원 상태 변경 실패:', error);
+    }
+  };
+  // 모달 열기
+  const openModal = () => {
+    setModalIsOpen(true);
+  };
+      
+  // 모달 닫기
+  const closeModal = () => {
+    setModalIsOpen(false)
+  };
   // 임시 컨설팅 데이터
   const consultingData = [
     { date: '2024.03.01', title: '컨설팅 진행 현황', status: '완료됨' },
@@ -118,7 +212,6 @@ export const MyPage = () => {
     { name: '3회차 컨설팅', value: 330 },
     { name: '4회차 컨설팅', value: 360 },
   ];
-
   return (
     <Stack
       spacing={3}
@@ -132,10 +225,10 @@ export const MyPage = () => {
         }
       }}
     >
-      <Text 
-        bold 
-        fontSize="20px"
+      <Text  
         style={{
+          fontSize: '24px',
+          fontWeight: 'bold',
           textAlign: 'center',
           marginBottom: '20px'
         }}
@@ -158,8 +251,11 @@ export const MyPage = () => {
                   '안녕하세요. TEST 님!'
                 }
               </Text>
-              <Text color="#666" fontSize="14px">
-                회원님의 현재 프로그램은 Pro 입니다
+              <Text color="#666" fontSize="14px" 
+              style={{
+                marginTop:'5px'
+              }}>
+                회원님의 현재 프로그램은 {userData?.isPremium ? 'Pro' : 'Basic'} 입니다
               </Text>
             </div>
           </ProfileInfo>
@@ -170,9 +266,69 @@ export const MyPage = () => {
             </Text>
           </ConsultingCount>
         </ProfileDetails>
-        <ViewButton>요금제 변경</ViewButton>
+        <ViewButton onClick={openModal}>요금제 변경</ViewButton>
       </ProfileSection>
-
+      {/* 모달 */}
+      <Modal
+          isOpen={modalIsOpen}
+          onRequestClose={closeModal}
+          contentLabel="요금제 변경"
+          style={{
+            overlay: {
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',  // 모달 배경
+            },
+            content: {
+              width: '430px',
+              height: '300px',
+              margin: 'auto',
+              padding: '20px',
+              textAlign: 'center',
+              borderRadius: '8px',
+              background: '#fff',
+            },
+          }}
+        >
+          <Stack spacing={4}>
+                    <Text bold>요금제 변경</Text>
+                    <RadioGroup>
+                        <PlanCard checked={selectedPlan === 'Basic'}>
+                            <input 
+                                type="radio" 
+                                name="plan" 
+                                value="Basic" 
+                                checked={selectedPlan === 'Basic'}
+                                onChange={(e) => {
+                                    setSelectedPlan(e.target.value);}}
+                            />
+                            <Text bold fontSize="20px">Basic</Text>
+                            <Text fontSize="18px">무료</Text>
+                            <Text style={{ marginTop: '12px' }}>• 요약본 제공</Text>
+                        </PlanCard>
+                        <PlanCard checked={selectedPlan === 'Pro'}>
+                            <input 
+                                type="radio" 
+                                name="plan" 
+                                value="Pro"
+                                checked={selectedPlan === 'Pro'}
+                                onChange={(e) => {
+                                    setSelectedPlan(e.target.value);}}
+                            />
+                            <Text bold fontSize="20px">Pro</Text>
+                            <PriceText>￦ 1000</PriceText>
+                            <Text>• 전문 제공</Text>
+                            <Text>• 문제분석과 계획 제공</Text>
+                        </PlanCard>
+                    </RadioGroup>
+                </Stack>
+          <div>
+          <button
+            onClick={() => {
+              handlePlanChange(selectedPlan);
+              closeModal();
+            }} 
+            style={{ padding: '10px', marginTop: '20px', backgroundColor: '#2F56C7', color: '#fff', border: 'none', borderRadius: '4px' }}>변경</button>
+        </div>
+      </Modal>
       <ConsultingSection>
         <Text 
           bold 
