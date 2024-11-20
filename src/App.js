@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Wrapper } from './components/organisms/index.js';
 import { BaseLine } from './components/atoms/index.js';
+import { ConsultingHistory } from './components/templetes/ConsultingHistory.jsx';
 
 // pages
 import { HomePage as Home } from './pages/Home.jsx';
@@ -25,6 +26,7 @@ export const App = () => {
 						<Route path="/consulting" element={<Consulting />} />
 						<Route path="/signup" element={<SignUp />} />
 						<Route path="/mypage" element={<MyPage />} />
+						<Route path="/consulting-history" element={<ConsultingHistory />} />
 					</Routes>
 				</Wrapper>
 			</BrowserRouter>
