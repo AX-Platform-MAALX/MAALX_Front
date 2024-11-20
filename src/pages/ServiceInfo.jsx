@@ -61,50 +61,53 @@ export const ServiceInfoPage = () => {
     const [painPoint, setPainPoint] = useState('');
     const [preferredAITech, setPreferredAITech] = useState('');
     const handleSubmit = async () => {
-        const parsedRevenue = parseFloat(revenue); // 유효한 숫자값인지 확인
-        const parsedemployeeCount = parseInt(employeeCount); // 유효한 숫자값인지 확인
-        // Retrieve the JWT token from localStorage
-        const jwtToken = localStorage.getItem('token'); // 로컬 스토리지에서 'token' 항목 가져오기
-        console.log(jwtToken);  // 콘솔에 출력하여 확인
-        const user = JSON.parse(localStorage.getItem('user'));
-        const userId = user ? user.userId : null;
-        const currentDate = new Date();
-        const formattedDate = currentDate.toISOString().split('T')[0]; 
-        if (!jwtToken) {
-            alert('로그인이 필요합니다.');
-            return;
-        }
-        fetch('http://localhost:8080/user/additional', {
-            method: 'PUT',  // 적절한 HTTP 메소드 사용
-            headers: {
-                'Authorization': `Bearer ${jwtToken}`,  // Bearer 형식으로 JWT 토큰 추가
-                'Content-Type': 'application/json',  // 요청 본문의 형식 (JSON)
-            },
-            body: JSON.stringify({
-                companyName,
-                revenue: parsedRevenue,
-                technologyField,
-                employeeCount: parsedemployeeCount,
-                consultingInterest,
-                painPoint,
-                preferredAITech,
-                date: formattedDate
-            }) 
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json(); // 응답이 JSON 형식으로 오지 않으면 여기서 오류가 발생
-        })
-        .then(data => {
-            console.log(data); // 정상적인 데이터 출력
-            navigate('/consulting');
-        })
-        .catch(error => {
-            console.error('Error:', error); // 오류 로그 출력
-        });
+        const parsedRevenue = parseFloat(revenue);
+        const parsedemployeeCount = parseInt(employeeCount);
+        const jwtToken = localStorage.getItem('token');
         
+        // 사용자 정보를 state로 저장하여 Consulting 페이지로 전달
+        const consultingData = {
+            companyName,
+            revenue: parsedRevenue,
+            technologyField,
+            employeeCount: parsedemployeeCount,
+            consultingInterest,
+            painPoint,
+            preferredAITech
+        };
+
+        // localStorage에 컨설팅 데이터 저장
+        localStorage.setItem('consultingData', JSON.stringify(consultingData));
+        
+        // 사용자의 요금제 정보 가져오기 (예: 'Basic' 또는 'Pro')
+        const userPlan = 'Pro'; // 테스트를 위해 임시로 'Pro'로 설정
+        localStorage.setItem('userPlan', userPlan);
+
+        try {
+            if (jwtToken) {  // 토큰이 있을 때만 백엔드 통신 시도
+                const response = await fetch('http://localhost:8080/user/additional', {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${jwtToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        ...consultingData,
+                        date: new Date().toISOString().split('T')[0]
+                    })
+                });
+
+                if (!response.ok) {
+                    console.error('Backend communication failed');
+                }
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        } finally {
+            // 백엔드 통신 성공 여부와 관계없이 페이지 이동
+            console.log('Navigating to consulting page...');
+            navigate('/consulting');
+        }
     };
     return (
         <div>

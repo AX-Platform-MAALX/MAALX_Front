@@ -1,7 +1,7 @@
 import { Stack, useTheme } from '@mui/system';
 import { Button, Text } from '../components/atoms/index.js';
 import styled from '@emotion/styled';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const ResultContainer = styled.div`
     padding: 20px;
@@ -71,20 +71,35 @@ const SubSection = styled(Stack)`
 export const ConsultingPage = () => {
     const theme = useTheme();
     const [activeTab, setActiveTab] = useState('요약본');
-    const [showResult, setShowResult] = useState(false);
-    
-    const handleSubmit = () => {
-        setShowResult(true);
-    };
+    const [consultingData, setConsultingData] = useState(null);
+    const [userPlan, setUserPlan] = useState('Basic');
+
+    useEffect(() => {
+        // localStorage에서 컨설팅 데이터와 사용자 요금제 정보 가져오기
+        const storedData = localStorage.getItem('consultingData');
+        const storedPlan = localStorage.getItem('userPlan');
+        
+        console.log('Stored Data:', storedData); // 디버깅용 로그
+        console.log('Stored Plan:', storedPlan); // 디버깅용 로그
+        
+        if (storedData) {
+            setConsultingData(JSON.parse(storedData));
+        }
+        if (storedPlan) {
+            setUserPlan(storedPlan);
+        }
+    }, []);
 
     const renderBasicContent = () => (
         <Stack spacing={2}>
             <Text bold fontSize="18px">[요약본]</Text>
             <Text>
-                AI Innovators Co.는 인공지능 및 클라우드 기술을 중심으로 한 성장형 IT 기업으로, 최근 5년간 매출이 꾸준히 증가하며 2023년 기준 1조 2000억 원을 기록했다. 현재 3000명의 직원을 두고 있으며, 주요 기술 분야는 인공지능, 머신러닝, 클라우드 등 첨단 기술이 포함이다.
+                {consultingData?.companyName}는 {consultingData?.technologyField}을 중심으로 한 성장형 IT 기업으로, 
+                현재 매출액은 {consultingData?.revenue}원이며, {consultingData?.employeeCount}명의 직원을 보유하고 있습니다.
             </Text>
             <Text>
-                기업이 직면한 주요 과제는 AI 기술 도입을 통한 업무 프로세스 최적화와 고객 경험 향상이며, 이를 위해 AI 기반 고객 지원 시스템 구축과 자동화 솔루션 도입을 계획하고 있다.
+                기업이 직면한 주요 과제는 {consultingData?.painPoint}이며, 
+                이를 위해 {consultingData?.preferredAITech} 기술 도입을 계획하고 있습니다.
             </Text>
         </Stack>
     );
@@ -95,28 +110,28 @@ export const ConsultingPage = () => {
             <Stack spacing={2}>
                 <Text bold>1. 현재 AI 분석 및 평가의 분석</Text>
                 <Text>
-                    AI Innovators Co.가 보유한 AI 관련 분야 사업에서는 AI분석 경험(UX)을 향상시키기 위한 AI 기술의 도입이 증가하고 있습니다. 현재 기업의 주요 기술 스택은 다음과 같습니다:
+                    {consultingData?.companyName}가 보유한 AI 관련 분야 사업에서는 AI분석 경험(UX)을 향상시키기 위한 AI 기술의 도입이 증가하고 있습니다. 현재 기업의 주요 기술 스택은 다음과 같습니다:
                 </Text>
                 <Text>
-                    • 인공지능 및 머신러닝 기술
-                    • 클라우드 인프라스트럭처
+                    • {consultingData?.technologyField}
+                    • AI 및 머신러닝 기술
                     • 데이터 분석 및 처리 시스템
                 </Text>
             </Stack>
             <Stack spacing={2}>
                 <Text bold>2. 문제점 해결하기 위한 계획</Text>
                 <Text>
-                    • AI 기반 고객 지원 시스템 구축: 사용자 만족도 향상
-                    • AI 기술 활용 자동화: 업무 프로세스 최적화
-                    • 데이터 기반 의사결정 시스템 도입: 경영 효율성 증대
+                    • {consultingData?.painPoint} 해결을 위한 계획
+                    • {consultingData?.preferredAITech} 기술 도입
+                    • 데이터 기반 의사결정 시스템 도입
                 </Text>
             </Stack>
             <Stack spacing={2}>
                 <Text bold>3. 기대효과</Text>
                 <Text>
-                    • 고객 서비스 품질 향상: 24/7 지원 체계 구축
-                    • 운영 비용 절감: 자동화를 통한 효율성 증대
-                    • 데이터 기반 의사결정: 정확한 시장 예측 및 대응
+                    • 고객 서비스 품질 향상
+                    • 운영 비용 절감
+                    • 데이터 기반 의사결정 강화
                 </Text>
             </Stack>
             <Stack spacing={2}>
@@ -129,72 +144,6 @@ export const ConsultingPage = () => {
             </Stack>
         </Stack>
     );
-
-    if (!showResult) {
-        return (
-            <Stack
-                spacing={theme.spacing(3)}
-                sx={{
-                    maxWidth: '800px',
-                    margin: '0 auto',
-                    padding: theme.spacing(4)
-                }}
-            >
-                <Text bold fontSize="24px">기업정보입력</Text>
-                
-                <Section>
-                    <SectionTitle bold>1. 기본정보</SectionTitle>
-                    <Stack spacing={2}>
-                        <SubSection>
-                            <Text>1-1. 사명</Text>
-                            <Input placeholder="사명을 입력해주세요" />
-                        </SubSection>
-                        <SubSection>
-                            <Text>1-2. 매출액(최근 5년)</Text>
-                            <Input placeholder="최근 5년 매출액을 입력해주세요" />
-                        </SubSection>
-                        <SubSection>
-                            <Text>1-3. 기술분야</Text>
-                            <Input placeholder="기업 기술분야를 입력해주세요" />
-                        </SubSection>
-                        <SubSection>
-                            <Text>1-4. 사원수</Text>
-                            <Input placeholder="사원수를 입력해주세요" />
-                        </SubSection>
-                        <SubSection>
-                            <Text>1-5. 시가총액</Text>
-                            <Input placeholder="시가총액을 입력해주세요" />
-                        </SubSection>
-                    </Stack>
-                </Section>
-
-                <Section>
-                    <SectionTitle bold>2. 부가정보</SectionTitle>
-                    <Stack spacing={2}>
-                        <SubSection>
-                            <Text>2-1. 희망전환점 분야</Text>
-                            <TextArea placeholder="희망하는 전환점 분야를 입력해주세요" />
-                        </SubSection>
-                        <SubSection>
-                            <Text>2-2. painpoint</Text>
-                            <TextArea placeholder="painpoint를 입력해주세요" />
-                        </SubSection>
-                        <SubSection>
-                            <Text>2-3. 희망 AI 기술</Text>
-                            <TextArea placeholder="희망하는 AI 기술을 입력해주세요" />
-                        </SubSection>
-                    </Stack>
-                </Section>
-
-                <Button 
-                    onClick={handleSubmit}
-                    style={{ width: '100%', borderRadius: '4px', padding: '12px' }}
-                >
-                    등록
-                </Button>
-            </Stack>
-        );
-    }
 
     return (
         <Stack 
@@ -214,12 +163,14 @@ export const ConsultingPage = () => {
                 >
                     요약본
                 </Tab>
-                <Tab 
-                    active={activeTab === '전문'} 
-                    onClick={() => setActiveTab('전문')}
-                >
-                    전문
-                </Tab>
+                {userPlan === 'Pro' && (
+                    <Tab 
+                        active={activeTab === '전문'} 
+                        onClick={() => setActiveTab('전문')}
+                    >
+                        전문
+                    </Tab>
+                )}
                 <PDFButton>PDF 다운로드</PDFButton>
             </TabContainer>
 
