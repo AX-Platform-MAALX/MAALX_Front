@@ -3,6 +3,7 @@ import { Text } from '../atoms/index.js';
 import styled from '@emotion/styled';
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, Line, Legend } from 'recharts';
+import { useNavigate } from 'react-router-dom';
 
 const ProfileSection = styled.div`
   background-color: white;
@@ -91,6 +92,7 @@ const ViewButton = styled.button`
 
 export const MyPage = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
   const [consultingStats] = useState({
     total: 4,
@@ -99,9 +101,42 @@ export const MyPage = () => {
   });
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    setUserData(user);
-  }, []);
+    // 로그인 상태 체크
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    const token = localStorage.getItem('token');
+    
+    if (!isLoggedIn || !token) {
+      navigate('/login');
+      return;
+    }
+
+    // 사용자 데이터 가져오기
+    try {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (user) {
+        setUserData(user);
+      } else {
+        // 사용자 데이터가 없으면 로그인 페이지로
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error('사용자 데이터 파싱 에러:', error);
+      navigate('/login');
+    }
+  }, [navigate]);
+
+  // 로그아웃 핸들러 추가
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
+  // userData가 없으면 로딩 표시 또는 빈 화면 반환
+  if (!userData) {
+    return <div>로딩중...</div>;
+  }
 
   // 임시 컨설팅 데이터
   const consultingData = [

@@ -48,6 +48,7 @@ export const Login = () => {
                 const userName = data.nickname || "사용자";
                 console.log(`${userName}님 로그인 성공했습니다`);  // 성공 메시지 출력
                 navigate('/');  // 로그인 후 대시보드로 이동 (경로는 실제 프로젝트에 맞게 수정)
+                localStorage.setItem('isLoggedIn', 'true');
             } else {
                 setErrorMessage(data.message || '로그인 실패');
             }

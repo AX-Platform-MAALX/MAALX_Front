@@ -42,17 +42,11 @@ export const Header = () => {
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
 	useEffect(() => {
+		const isLoggedInValue = localStorage.getItem('isLoggedIn');
 		const token = localStorage.getItem('token');
-		if (token) {
-		  setIsLoggedIn(true);
-		  const user = JSON.parse(localStorage.getItem('user'));
-		  console.log(user);  // user 값이 제대로 로드되는지 확인
-		  setUserName(user ? user.nickname : '');
-		} else {
-		  setIsLoggedIn(false);
-		}
-	  });  // 빈 배열을 전달하여 처음 렌더링될 때만 실행되도록 설정
-	
+		setIsLoggedIn(!!(isLoggedInValue && token)); // 둘 다 있을 때만 로그인 상태로 설정
+	}, []);
+
 	const handleLocationClick = (path) => () => {
 		navigate(path);
 	};
@@ -60,12 +54,13 @@ export const Header = () => {
 		setIsDropdownOpen((prev) => !prev);  // 상태 토글
     };
 	const handleLogout = () => {
-		localStorage.clear();
-		setIsLoggedIn(false); // 로그아웃 후 로그인 상태 변경
-		setUserName(''); // 사용자 이름 초기화
-		navigate("/"); // 홈으로 리다이렉트
-		window.location.reload();
-	  };
+		localStorage.removeItem('token');
+		localStorage.removeItem('user');
+		localStorage.removeItem('isLoggedIn'); // isLoggedIn도 제거
+		setIsLoggedIn(false);
+		navigate('/');
+		window.location.reload(); // 페이지 새로고침하여 헤더 상태 업데이트
+	};
 	  
 	return (
 		<Stack
