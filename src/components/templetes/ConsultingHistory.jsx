@@ -309,7 +309,6 @@ export const ConsultingHistory = () => {
             <Text bold fontSize="20px" style={{ textAlign: 'center', marginBottom: '24px' }}>
               피드백
             </Text>
-            
             <CheckboxGroup>
               <Text bold style={{ marginBottom: '12px' }}>1. 만족한점 (중복선택 가능)</Text>
               <CheckboxItem>

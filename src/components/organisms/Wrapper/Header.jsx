@@ -45,7 +45,7 @@ export const Header = () => {
 		const isLoggedInValue = localStorage.getItem('isLoggedIn');
 		const token = localStorage.getItem('token');
 		setIsLoggedIn(!!(isLoggedInValue && token)); // 둘 다 있을 때만 로그인 상태로 설정
-	}, []);
+	}, [localStorage.getItem('isLoggedIn')]);
 
 	const handleLocationClick = (path) => () => {
 		navigate(path);
