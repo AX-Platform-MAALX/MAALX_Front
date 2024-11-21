@@ -20,6 +20,7 @@ const Input = styled.input`
     border-radius: 4px;
     width: 100%;
     background-color: #f5f5f5;
+    font-size: 16px;
 `;
 
 const TextArea = styled.textarea`
@@ -30,6 +31,7 @@ const TextArea = styled.textarea`
     background-color: #f5f5f5;
     min-height: 100px;
     resize: vertical;
+    font-size: 16px;
 `;
 
 const Section = styled.div`
@@ -116,7 +118,7 @@ export const ServiceInfoPage = () => {
             spacing={theme.spacing(3)}
             sx={{
                 maxWidth: '500px',
-                marginLeft: '26%', // 왼쪽 정렬을 위해 margin 설정
+                marginLeft: '35%', // 왼쪽 정렬을 위해 margin 설정
                 marginTop: '3%',
                 padding: theme.spacing(6)
             }}

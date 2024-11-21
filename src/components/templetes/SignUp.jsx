@@ -81,12 +81,19 @@ export const SignUp = () => {
                 body: JSON.stringify({
                     email: formData.email,
                     nickname: formData.nickname,
-                    password: formData.password
+                    password: formData.password,
+                    isPremium: selectedPlan === 'Pro' ? true : false // 요금제에 따른 is_premium 값 설정
                 })
             });
     
             const data = await response.json();
-    
+            console.log(JSON.stringify({
+                email: formData.email,
+                nickname: formData.nickname,
+                password: formData.password,
+                isPremium: selectedPlan === 'Pro' ? true : false // 요금제에 따른 is_premium 값 설정
+            }));
+            
             if (response.ok) {
                 setSuccessMessage(data.message);
                 setErrorMessage('');
@@ -112,7 +119,7 @@ export const SignUp = () => {
                 padding: theme.spacing(4)
             }}
         >
-            <Text bold fontSize="24px">회원가입</Text>
+            <Text bold style={{fontSize:'24px', marginBottom:'30px'}}>회원가입</Text>
             <Stack spacing={theme.spacing(3)} sx={{ width: '100%' }}>
                 <Stack spacing={1}>
                     <Text>이메일<RequiredMark>*</RequiredMark></Text>
@@ -150,7 +157,9 @@ export const SignUp = () => {
                                 name="plan" 
                                 value="Basic" 
                                 checked={selectedPlan === 'Basic'}
-                                onChange={(e) => setSelectedPlan(e.target.value)}
+                                onChange={(e) => {
+                                    console.log("Plan selected:", e.target.value); // 선택된 값 확인
+                                    setSelectedPlan(e.target.value);}}
                             />
                             <Text bold fontSize="20px">Basic</Text>
                             <Text fontSize="18px">무료</Text>
@@ -162,7 +171,9 @@ export const SignUp = () => {
                                 name="plan" 
                                 value="Pro"
                                 checked={selectedPlan === 'Pro'}
-                                onChange={(e) => setSelectedPlan(e.target.value)}
+                                onChange={(e) => {
+                                    console.log("Plan selected:", e.target.value); // 선택된 값 확인
+                                    setSelectedPlan(e.target.value);}}
                             />
                             <Text bold fontSize="20px">Pro</Text>
                             <PriceText>￦ 1000</PriceText>

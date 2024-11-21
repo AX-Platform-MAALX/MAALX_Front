@@ -3,6 +3,7 @@ import { Text } from '../atoms/index.js';
 import styled from '@emotion/styled';
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, Line, Legend } from 'recharts';
+import Modal from 'react-modal';  // 모달 임포트
 import { useNavigate } from 'react-router-dom';
 
 const ProfileSection = styled.div`
@@ -89,55 +90,114 @@ const ViewButton = styled.button`
   padding: 8px 16px;
   cursor: pointer;
 `;
-
+const RadioGroup = styled.div`
+    display: flex;
+    gap: 12px;
+    width: 100%;
+`;
+const PlanCard = styled.label`
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    border: 2px solid ${props => props.checked ? '#2f56c7' : '#eee'};
+    border-radius: 8px;
+    cursor: pointer;
+    flex: 1;
+    position: relative;
+    background-color: #fff;
+    
+    input {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+    }
+`;
+const PriceText = styled(Text)`
+    color: #FF6B00;
+    margin: 8px 0;
+    font-weight: bold;
+    font-size: 18px;
+`;
 export const MyPage = () => {
   const theme = useTheme();
-  const navigate = useNavigate();
+  const jwtToken = localStorage.getItem('token'); // 친구 변경 사항
   const [userData, setUserData] = useState(null);
-  const [consultingStats] = useState({
-    total: 4,
+  const [modalIsOpen, setModalIsOpen] = useState(false);  // 모달 상태 관리
+  const [selectedPlan, setSelectedPlan] = useState('Basic'); // 기본값은 'Basic'으로 설정
+  const [consultingStats, setConsultingStats] = useState({
+    total: 0,
     completed: 4,
     inProgress: 0
   });
 
   useEffect(() => {
-    // 로그인 상태 체크
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
-    const token = localStorage.getItem('token');
-    
-    if (!isLoggedIn || !token) {
-      navigate('/login');
-      return;
+    const user = JSON.parse(localStorage.getItem('user')); // 친구 변경 사항
+    setUserData(user);
+    fetchInfoCount(user.userId); 
+    if (user?.isPremium) {
+      setSelectedPlan('Pro');
+    } else {
+      setSelectedPlan('Basic');
     }
+  }, []);
 
-    // 사용자 데이터 가져오기
+  const fetchInfoCount = async (userId) => {
     try {
-      const user = JSON.parse(localStorage.getItem('user'));
-      if (user) {
-        setUserData(user);
-      } else {
-        // 사용자 데이터가 없으면 로그인 페이지로
-        navigate('/login');
+      if (!userId) throw new Error('사용자 ID를 찾을 수 없습니다');
+      console.log(userId);
+      const response = await fetch('http://localhost:8080/user/additional/count', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${jwtToken}`, // 친구 변경 사항
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId }), // userId를 요청 본문에 담아서 전송
+      });
+
+      if (!response.ok) {
+        throw new Error('총 개수를 가져오는 데 실패했습니다');
       }
-    } catch (error) {
-      console.error('사용자 데이터 파싱 에러:', error);
-      navigate('/login');
+
+      const data = await response.json();
+      setConsultingStats((prevStats) => ({
+        ...prevStats,
+        total: data.count // Update the total count here
+      }));
+    } catch (err) {
+      console.error(err.message);
     }
-  }, [navigate]);
-
-  // 로그아웃 핸들러 추가
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('user');
-    navigate('/login');
   };
-
-  // userData가 없으면 로딩 표시 또는 빈 화면 반환
-  if (!userData) {
-    return <div>로딩중...</div>;
-  }
-
+  const handlePlanChange = async (plan) => {
+    setSelectedPlan(plan);
+    const isPremium = plan === 'Pro';
+    console.log(isPremium);
+    try {
+      const response = await fetch('http://localhost:8080/user/upgrade', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${jwtToken}`, // 친구 변경 사항
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isPremium }),
+      });
+      if (!response.ok) {
+        throw new Error('회원 상태 변경에 실패했습니다');
+      }
+      const data = await response.json();
+      console.log('회원 상태 변경 성공:', data);
+    } catch (error) {
+      console.error('회원 상태 변경 실패:', error);
+    }
+  };
+  // 모달 열기
+  const openModal = () => {
+    setModalIsOpen(true);
+  };
+      
+  // 모달 닫기
+  const closeModal = () => {
+    setModalIsOpen(false);
+  };
   // 임시 컨설팅 데이터
   const consultingData = [
     { date: '2024.03.01', title: '컨설팅 진행 현황', status: '완료됨' },
@@ -153,7 +213,6 @@ export const MyPage = () => {
     { name: '3회차 컨설팅', value: 330 },
     { name: '4회차 컨설팅', value: 360 },
   ];
-
   return (
     <Stack
       spacing={3}
@@ -167,10 +226,10 @@ export const MyPage = () => {
         }
       }}
     >
-      <Text 
-        bold 
-        fontSize="20px"
+      <Text  
         style={{
+          fontSize: '24px',
+          fontWeight: 'bold',
           textAlign: 'center',
           marginBottom: '20px'
         }}
@@ -193,8 +252,11 @@ export const MyPage = () => {
                   '안녕하세요. TEST 님!'
                 }
               </Text>
-              <Text color="#666" fontSize="14px">
-                회원님의 현재 프로그램은 Pro 입니다
+              <Text color="#666" fontSize="14px" 
+              style={{
+                marginTop:'5px'
+              }}>
+                회원님의 현재 프로그램은 {userData?.isPremium ? 'Pro' : 'Basic'} 입니다
               </Text>
             </div>
           </ProfileInfo>
@@ -205,75 +267,8 @@ export const MyPage = () => {
             </Text>
           </ConsultingCount>
         </ProfileDetails>
-        <ViewButton>요금제 변경</ViewButton>
+        <ViewButton onClick={openModal}>요금제 변경</ViewButton> {/* 닫는 태그 추가 */}
       </ProfileSection>
-
-      <ConsultingSection>
-        <Text 
-          bold 
-          fontSize="16px"
-          style={{
-            marginBottom: '20px',
-            textAlign: 'center'
-          }}
-        >
-          매출액 변화
-        </Text>
-        
-        <ChartContainer>
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart
-              data={chartData}
-              margin={{
-                top: 20,
-                right: 30,
-                left: 20,
-                bottom: 20
-              }}
-            >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="name" />
-              <YAxis 
-                domain={[0, 400]}
-                ticks={[0, 50, 100, 150, 200, 250, 300, 350, 400]}
-              />
-              <Tooltip />
-              <Legend 
-                payload={[
-                  { value: '매출액', type: 'rect', color: '#2F56C7' },
-                  { 
-                    value: '선형(매출액)', 
-                    type: 'line', 
-                    color: '#2F56C7',
-                    symbol: 'diamond',
-                    strokeDasharray: '2 2'
-                  }
-                ]}
-              />
-              <Bar 
-                dataKey="value" 
-                name="매출액" 
-                fill="#2F56C7" 
-                radius={[4, 4, 0, 0]} 
-                barSize={40}
-                label={{ 
-                  position: 'top',
-                  fill: '#2F56C7',
-                  fontSize: 12
-                }}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="value" 
-                name="선형(매출액)"
-                stroke="#2F56C7" 
-                strokeDasharray="5 5"
-                dot={{ fill: '#2F56C7', r: 4 }}
-              />
-            </ComposedChart>
-          </ResponsiveContainer>
-        </ChartContainer>
-      </ConsultingSection>
     </Stack>
-  );
-}; 
+  )
+}

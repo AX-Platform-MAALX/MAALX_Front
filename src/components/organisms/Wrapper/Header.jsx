@@ -96,7 +96,7 @@ export const Header = () => {
 						fontFamily: "'MPLUSRounded1c', sans-serif",  // 원하는 폰트 적용
 						color: location.pathname === '/service-info' ? '#2F56C7' : '#333', // 경로에 따라 색상 변경
 					}}
-					onClick={handleLocationClick('/service-info')}>컨설팅</TextButton>
+					onClick={localStorage.getItem('token') ? handleLocationClick('/service-info') : null}>컨설팅</TextButton>
 					{isLoggedIn ? (
 					<Stack direction="row" alignItems="center">
 						<img 
