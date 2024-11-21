@@ -3,6 +3,7 @@ import { Button, Text } from '../components/atoms/index.js';
 import styled from '@emotion/styled';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // 추가: 페이지 이동을 위한 훅
+import { RadioGroup, FormControlLabel, Radio } from '@mui/material';
 
 
 const Title = styled.div`
@@ -56,26 +57,28 @@ export const ServiceInfoPage = () => {
     const theme = useTheme();
     const navigate = useNavigate(); // 페이지 이동을 위한 훅
     const [companyName, setCompanyName] = useState('');
+    const [industry, setIndustry] = useState('');
     const [revenue, setRevenue] = useState('');
-    const [technologyField, setTechnologyField] = useState('');
-    const [employeeCount, setEmployeeCount] = useState('');
-    const [consultingInterest, setConsultingInterest] = useState('');
     const [painPoint, setPainPoint] = useState('');
-    const [preferredAITech, setPreferredAITech] = useState('');
+    const [detailedIssue, setDetailedIssue] = useState('');
+    const [consultingField, setConsultingField] = useState('');
+    const [aiNeeds, setAiNeeds] = useState('');
+    const [detailedDemand, setDetailedDemand] = useState('');
+
     const handleSubmit = async () => {
         const parsedRevenue = parseFloat(revenue);
-        const parsedemployeeCount = parseInt(employeeCount);
         const jwtToken = localStorage.getItem('token');
         
         // 사용자 정보를 state로 저장하여 Consulting 페이지로 전달
         const consultingData = {
             companyName,
+            industry,
             revenue: parsedRevenue,
-            technologyField,
-            employeeCount: parsedemployeeCount,
-            consultingInterest,
             painPoint,
-            preferredAITech
+            detailedIssue,
+            consultingField,
+            aiNeeds,
+            detailedDemand
         };
 
         // localStorage에 컨설팅 데이터 저장
@@ -118,12 +121,11 @@ export const ServiceInfoPage = () => {
             spacing={theme.spacing(3)}
             sx={{
                 maxWidth: '500px',
-                marginLeft: '35%', // 왼쪽 정렬을 위해 margin 설정
+                marginLeft: '36%', // 왼쪽 정렬을 위해 margin 설정
                 marginTop: '3%',
                 padding: theme.spacing(6)
             }}
         >                     
- 
             <Section>
                 <SectionTitle bold>1. 기본정보</SectionTitle>
                 <Stack spacing={2}>
@@ -136,57 +138,124 @@ export const ServiceInfoPage = () => {
                         />
                     </SubSection>
                     <SubSection>
-                        <Text bold>1-2. 매출액(최근 5년)</Text>
+                        <Text bold>1-2. 사업분야</Text>
+                        <RadioGroup
+                            value={industry}
+                            onChange={(e) => setIndustry(e.target.value)}row 
+                            style={{ display: 'flex', flexDirection: 'vertical' }} >
+                            <FormControlLabel
+                                value="제조업"
+                                control={<Radio />}
+                                label="제조업"/>
+                            <FormControlLabel
+                                value="서비스업"
+                                control={<Radio />}
+                                label="서비스업"/>
+                            <FormControlLabel
+                                value="정보통신업"
+                                control={<Radio />}
+                                label="정보통신업"/>
+                        </RadioGroup>
+                    </SubSection>
+                    <SubSection>
+                        <Text bold>1-3. 매출액(최근 3년)</Text>
                         <Input
                             value={revenue}
                             onChange={(e) => setRevenue(e.target.value)}
                             placeholder="최근 5년 매출액을 입력해주세요"
                         />
                     </SubSection>
-                    <SubSection>
-                        <Text bold>1-3. 기술분야</Text>
-                        <Input
-                            value={technologyField}
-                            onChange={(e) => setTechnologyField(e.target.value)}
-                            placeholder="기업 기술분야를 입력해주세요"
-                        />
-                    </SubSection>
-                    <SubSection>
-                        <Text bold>1-4. 사원수</Text>
-                        <Input
-                            value={employeeCount}
-                            onChange={(e) => setEmployeeCount(e.target.value)}
-                            placeholder="사원수를 입력해주세요"
-                        />                    
-                    </SubSection>
                 </Stack>
             </Section>
-
             <Section>
                 <SectionTitle bold>2. 부가정보</SectionTitle>
                 <Stack spacing={2}>
                     <SubSection>
-                        <Text bold>2-1. 희망전환점 분야</Text>
-                        <TextArea
-                            value={consultingInterest}
-                            onChange={(e) => setConsultingInterest(e.target.value)}
-                            placeholder="희망하는 전환점 분야를 입력해주세요"
-                        />
-                    </SubSection>
-                    <SubSection>
-                        <Text bold>2-2. painpoint</Text>
-                        <TextArea
+                        <Text bold>2-1. painpoint</Text>
+                        <RadioGroup
                             value={painPoint}
                             onChange={(e) => setPainPoint(e.target.value)}
-                            placeholder="painpoint를 입력해주세요"
+                            style={{ display: 'flex', flexDirection: 'vertical' }} >
+                            <FormControlLabel
+                                value="높은 구축 비용"
+                                control={<Radio />}
+                                label="높은 구축 비용"/>
+                            <FormControlLabel
+                                value="인적 자원 부족"
+                                control={<Radio />}
+                                label="인적 자원 부족"/>
+                            <FormControlLabel
+                                value="기술 경험 부족"
+                                control={<Radio />}
+                                label="기술 경험 부족"/>
+                            <FormControlLabel
+                                value="AI 이점에 대한 불확실성"
+                                control={<Radio />}
+                                label="AI 이점에 대한 불확실성"/>
+                            <FormControlLabel
+                                value="경영진의 AI 지식 부족"
+                                control={<Radio />}
+                                label="경영진의 AI 지식 부족"/>
+                            <FormControlLabel
+                                value="조직내 저항"
+                                control={<Radio />}
+                                label="조직내 저항"/>
+                            <FormControlLabel
+                                value="AX 전략 수립의 어려움"
+                                control={<Radio />}
+                                label="AX 전략 수립의 어려움"/>
+                        </RadioGroup>
+                    </SubSection>
+                    <SubSection>
+                        <Text bold>2-2. detailed issue</Text>
+                        <TextArea
+                            value={detailedIssue}
+                            onChange={(e) => setDetailedIssue(e.target.value)}
+                            placeholder="detailed issue를 입력해주세요"
                         />
                     </SubSection>
                     <SubSection>
-                        <Text bold>2-3. 희망 AI 기술</Text>
-                        <TextArea
-                            value={preferredAITech}
-                            onChange={(e) => setPreferredAITech(e.target.value)}
-                            placeholder="희망하는 AI 기술을 입력해주세요"
+                        <Text bold>2-3. consulting field</Text>
+                        <RadioGroup
+                            value={consultingField}
+                            onChange={(e) => setConsultingField(e.target.value)}
+                            style={{ display: 'flex', flexDirection: 'vertical' }} >
+                            <FormControlLabel
+                                value="AX 방법론용"
+                                control={<Radio />}
+                                label="AX 방법론"/>
+                            <FormControlLabel
+                                value="비즈니스 혁신 및 인사이트 분석"
+                                control={<Radio />}
+                                label="비즈니스 혁신 및 인사이트 분석"/>
+                        </RadioGroup>
+                    </SubSection>
+                    <SubSection>
+                        <Text bold>2-4. ai needs</Text>
+                        <RadioGroup
+                            value={aiNeeds}
+                            onChange={(e) => setAiNeeds(e.target.value)}
+                            style={{ display: 'flex', flexDirection: 'vertical' }} >
+                            <FormControlLabel
+                                value="AI 챗봇 및 고객 지원 자동화"
+                                control={<Radio />}
+                                label="AI 챗봇 및 고객 지원 자동화"/>
+                            <FormControlLabel
+                                value="업무 자동화"
+                                control={<Radio />}
+                                label="업무 자동화"/>
+                            <FormControlLabel
+                                value="AI 응용 제품 및 서비스 개발"
+                                control={<Radio />}
+                                label="AI 응용 제품 및 서비스 개발"/>
+                        </RadioGroup>
+                    </SubSection>
+                    <SubSection>
+                        <Text bold>2-5. detailed demand</Text>
+                        <Input
+                            value={detailedDemand}
+                            onChange={(e) => setDetailedDemand(e.target.value)}
+                            placeholder="구체적인 요구사항을 입력해주세요"
                         />
                     </SubSection>
                 </Stack>
