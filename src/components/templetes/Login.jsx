@@ -39,8 +39,6 @@ export const Login = () => {
             });
 
             const data = await response.json();
-            console.log(data);  // 전체 응답 객체를 콘솔에 출력하여 확인
-
             if (response.ok) {
                 // 로그인 성공 시 JWT 토큰 저장
                 localStorage.setItem("token", data.token);  // JWT를 localStorage에 저장

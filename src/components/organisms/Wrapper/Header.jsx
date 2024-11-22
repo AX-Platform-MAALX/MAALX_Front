@@ -56,7 +56,12 @@ export const Header = () => {
 	const handleLogout = () => {
 		localStorage.removeItem('token');
 		localStorage.removeItem('user');
-		localStorage.removeItem('isLoggedIn'); // isLoggedIn도 제거
+		localStorage.removeItem('isLoggedIn'); 
+		localStorage.removeItem('totalConsultings');
+		localStorage.removeItem('consultingHistory');
+		localStorage.removeItem('userPlan');
+		localStorage.removeItem('consultingData');
+
 		setIsLoggedIn(false);
 		navigate('/');
 		window.location.reload(); // 페이지 새로고침하여 헤더 상태 업데이트
@@ -106,7 +111,7 @@ export const Header = () => {
 						onClick={handleProfileClick} 
 						/>
 						<DropdownMenu isOpen={isDropdownOpen}>
-						<DropdownItem to="/mypage">마이페이지</DropdownItem>
+						<DropdownItem to="/mypage" >마이페이지</DropdownItem>
 						<DropdownItem to="/consulting-history">컨설팅 기록</DropdownItem>
 						<DropdownItem as="div" onClick={handleLogout}>로그아웃</DropdownItem>
 						</DropdownMenu>

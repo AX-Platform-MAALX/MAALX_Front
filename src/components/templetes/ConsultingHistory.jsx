@@ -4,6 +4,7 @@ import styled from '@emotion/styled';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Modal from 'react-modal';
+import { RadioGroup, FormControlLabel, Radio,TextField  } from '@mui/material';
 
 const ConsultingSection = styled.div`
   background-color: white;
@@ -24,9 +25,9 @@ const TableContainer = styled.div`
 
 const TableHeader = styled.div`
   display: grid;
-  grid-template-columns: 0.8fr 3fr 1.2fr 1.2fr;
+  grid-template-columns: 0.7fr 0.8fr 0.5fr 0.4fr;
   padding: 25px 80px;
-  background-color: #F8F9FD;
+  background-color: #E7E7E7;
   border-bottom: 1px solid #E5E5E5;
   font-weight: bold;
   gap: 80px;
@@ -34,7 +35,7 @@ const TableHeader = styled.div`
 
 const TableRow = styled.div`
   display: grid;
-  grid-template-columns: 0.8fr 3fr 1.2fr 1.2fr;
+  grid-template-columns: 0.6fr 0.8fr 0.5fr 0.4fr;
   padding: 25px 80px;
   border-bottom: 1px solid #E5E5E5;
   align-items: center;
@@ -75,7 +76,7 @@ const FeedbackForm = styled.div`
   gap: 16px;
 `;
 
-const CheckboxGroup = styled.div`
+const Section = styled.div`
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -118,73 +119,90 @@ export const ConsultingHistory = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const [consultingHistory, setConsultingHistory] = useState([]);
+  const [consultingTotal, setConsultingTotal] = useState(0); // total을 상태로 관리
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedConsulting, setSelectedConsulting] = useState(null);
-  const [feedbackForm, setFeedbackForm] = useState({
-    satisfiedPoints: {
-      painpointSolution: false,
-      expectedEffect: false,
-      easyToUnderstand: false,
-      satisfiedEtc: false
-    },
-    satisfiedComment: '',
-    
-    unsatisfiedPoints: {
-      inappropriateSolution: false,
-      tooAbstract: false,
-      poorAnalysis: false,
-      unsatisfiedEtc: false
-    },
-    unsatisfiedComment: '',
-    
-    willConsultAgain: true,
-    
-    additionalComments: ''
-  });
+  const [satisfaction,setSatisfaction]=useState('');
+  const [dissatisfaction,setDissatisfaction]=useState('');
+  const [again,setAgain]=useState('');
+  const [addition,setAddition]=useState('');
+  const [otherSatisfaction, setOtherSatisfaction] = useState('');
+  const [otherDissatisfaction, setOtherDissatisfaction] = useState('');
+  Modal.setAppElement("#root");
 
   useEffect(() => {
     const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user')); // 친구 변경 사항
     if (!token) {
       navigate('/login');
       return;
     }
+  // API 호출하여 userId에 맞는 컨설팅 내역을 가져오기
+  const fetchConsultingHistory = async () => {
+    try {
+      const response = await fetch(`http://localhost:8080/consulting/user/${user.userId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
 
-    setConsultingHistory([
-      { 
-        id: 1,
-        round: '1회차',
-        title: '1회차 컨설팅 결과', 
-        date: '2024.03.01',
-        feedbackStatus: false
-      },
-      { 
-        id: 2,
-        round: '2회차',
-        title: '2회차 컨설팅 결과', 
-        date: '2024.02.15',
-        feedbackStatus: false
-      },
-      { 
-        id: 3,
-        round: '3회차',
-        title: '3회차 컨설팅 결과', 
-        date: '2024.02.01',
-        feedbackStatus: true
-      },
-      { 
-        id: 4,
-        round: '4회차',
-        title: '4회차 컨설팅 결과', 
-        date: '2024.01.15',
-        feedbackStatus: true
-      },
-    ]);
+      if (!response.ok) {
+        throw new Error('컨설팅 내역을 가져오는 데 실패했습니다.');
+      }
+
+      const data = await response.json();
+      console.log(data);
+      setConsultingHistory(data);  // 가져온 데이터로 state 업데이트
+      setConsultingTotal(data.length); // 전체 컨설팅 횟수 계산
+      localStorage.setItem('consultingHistory', JSON.stringify(data));
+      localStorage.setItem('totalConsultings', JSON.stringify(data.length));
+
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+
+  fetchConsultingHistory();
   }, [navigate]);
 
   const handleViewReport = (id) => {
     navigate(`/consulting/${id}`);
   };
-
+  const createSurvey = async (consultingResponseId) => {
+    try {
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      };
+  
+      const surveyRequestDto = {
+        satisfaction: satisfaction === "기타" ? otherSatisfaction : satisfaction,
+        dissatisfaction: dissatisfaction === "기타" ? otherDissatisfaction : dissatisfaction,
+        again: again,
+        addition: addition,
+      };      
+  
+      const response = await fetch(`http://localhost:8080/survey/create/${consultingResponseId}`, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(surveyRequestDto),
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("설문조사 생성 실패:", errorData.message || "알 수 없는 오류");
+        return;
+      }
+  
+      const data = await response.json();
+      console.log("설문조사 생성 성공:", data);
+    } catch (error) {
+      console.error("네트워크 오류:", error.message);
+    }
+    setModalIsOpen(false);
+  };
   const handleFeedbackClick = (consulting) => {
     if (!consulting.feedbackStatus) {
       setSelectedConsulting(consulting);
@@ -192,20 +210,26 @@ export const ConsultingHistory = () => {
     }
   };
 
-  const handleSubmit = () => {
-    console.log('피드백 제출:', feedbackForm);
-    setModalIsOpen(false);
-    setConsultingHistory(prev =>
-      prev.map(item =>
-        item.id === selectedConsulting.id
-          ? { ...item, feedbackStatus: true }
-          : item
-      )
-    );
+  const handleSubmit = async () => {
+    const token = localStorage.getItem('token');
+    try {
+      await createSurvey(2, surveyRequestDto,token);
+      setModalIsOpen(false);
+      setConsultingHistory((prev) =>
+        prev.map((item) =>
+          item.id === selectedConsulting.id
+            ? { ...item, feedbackStatus: true }
+            : item
+        )
+      );
+    } catch (error) {
+      console.error('설문 제출 실패:', error);
+    }
   };
 
-  const totalConsultings = consultingHistory.length;
-  const latestConsulting = consultingHistory[0]?.date || '없음';
+  const totalConsultings = consultingTotal;
+  const latestConsulting = consultingHistory.length > 0
+  ? consultingHistory[consultingHistory.length - 1].createdAt: '없음'; // 가장 최근의 컨설팅 날짜를 가져옵니다.  const nextConsulting = '없음';
   const nextConsulting = '없음';
 
   return (
@@ -224,9 +248,9 @@ export const ConsultingHistory = () => {
       >
         <Text 
           bold 
-          fontSize="20px"
           style={{
             textAlign: 'center',
+            fontSize:"24px",
             marginBottom: '20px'
           }}
         >
@@ -243,7 +267,6 @@ export const ConsultingHistory = () => {
           >
             전체 컨설팅 내역
           </Text>
-
           <TableContainer>
             <TableHeader>
               <Text>회차</Text>
@@ -251,11 +274,11 @@ export const ConsultingHistory = () => {
               <Text>날짜</Text>
               <Text>피드백</Text>
             </TableHeader>
-            {consultingHistory.map((consulting) => (
+            {consultingHistory.map((consulting,index) => (
               <TableRow key={consulting.id}>
-                <Text>{consulting.round}</Text>
-                <Text bold>{consulting.title}</Text>
-                <Text>{consulting.date}</Text>
+                <Text>{index + 1}</Text>
+                <Text bold>{index + 1}회차 컨설팅 결과</Text>
+                <Text>{consulting.createdAt}</Text>
                 <FeedbackStatus 
                   isCompleted={consulting.feedbackStatus}
                   onClick={() => handleFeedbackClick(consulting)}
@@ -288,7 +311,6 @@ export const ConsultingHistory = () => {
           </Text>
         </ConsultingSection>
       </Stack>
-
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={() => setModalIsOpen(false)}
@@ -309,193 +331,103 @@ export const ConsultingHistory = () => {
             <Text bold fontSize="20px" style={{ textAlign: 'center', marginBottom: '24px' }}>
               피드백
             </Text>
-            <CheckboxGroup>
+            <Section>
               <Text bold style={{ marginBottom: '12px' }}>1. 만족한점 (중복선택 가능)</Text>
-              <CheckboxItem>
-                <input
-                  type="checkbox"
-                  name="painpointSolution"
-                  checked={feedbackForm.satisfiedPoints.painpointSolution}
-                  onChange={(e) => setFeedbackForm(prev => ({
-                    ...prev,
-                    satisfiedPoints: {
-                      ...prev.satisfiedPoints,
-                      painpointSolution: e.target.checked
-                    }
-                  }))}
+              <RadioGroup
+                  value={satisfaction}
+                  onChange={(e) => setSatisfaction(e.target.value)} 
+                  style={{ display: 'flex', flexDirection: 'vertical' }} >
+                  <FormControlLabel
+                    value="Painpoint 해소를 위한 제안이 적절함"
+                    control={<Radio />}
+                    label="Painpoint 해소를 위한 제안이 적절함"/>
+                  <FormControlLabel
+                    value="실제 도입 효과가 기대만큼 나타남"
+                    control={<Radio />}
+                    label="실제 도입 효과가 기대만큼 나타남"/>
+                  <FormControlLabel
+                    value="컨설팅 과정에서 제공된 설명이 이해하기 쉬움"
+                    control={<Radio />}
+                    label="컨설팅 과정에서 제공된 설명이 이해하기 쉬움"/>
+                  <FormControlLabel
+                    value="기타"
+                    label="기타"
+                    control={<Radio />}/>
+              </RadioGroup>
+                {satisfaction === "기타" && (
+                <TextField
+                  label="기타 사항을 입력해주세요"
+                  variant="outlined"
+                  fullWidth
+                  multiline
+                  rows={4}
+                  value={otherSatisfaction}
+                  onChange={(e) => setOtherSatisfaction(e.target.value)}
+                  style={{ marginTop: '16px' }}
                 />
-                <span>Painpoint 해소를 위한 제안이 적절함</span>
-              </CheckboxItem>
-              <CheckboxItem>
-                <input
-                  type="checkbox"
-                  name="expectedEffect"
-                  checked={feedbackForm.satisfiedPoints.expectedEffect}
-                  onChange={(e) => setFeedbackForm(prev => ({
-                    ...prev,
-                    satisfiedPoints: {
-                      ...prev.satisfiedPoints,
-                      expectedEffect: e.target.checked
-                    }
-                  }))}
-                />
-                <span>실제 도입 효과가 기대만큼 나타남</span>
-              </CheckboxItem>
-              <CheckboxItem>
-                <input
-                  type="checkbox"
-                  name="easyToUnderstand"
-                  checked={feedbackForm.satisfiedPoints.easyToUnderstand}
-                  onChange={(e) => setFeedbackForm(prev => ({
-                    ...prev,
-                    satisfiedPoints: {
-                      ...prev.satisfiedPoints,
-                      easyToUnderstand: e.target.checked
-                    }
-                  }))}
-                />
-                <span>컨설팅 과정에서 제공된 설명이 이해하기 쉬움</span>
-              </CheckboxItem>
-              <CheckboxItem>
-                <input
-                  type="checkbox"
-                  name="satisfiedEtc"
-                  checked={feedbackForm.satisfiedPoints.satisfiedEtc}
-                  onChange={(e) => setFeedbackForm(prev => ({
-                    ...prev,
-                    satisfiedPoints: {
-                      ...prev.satisfiedPoints,
-                      satisfiedEtc: e.target.checked
-                    }
-                  }))}
-                />
-                <span>기타</span>
-              </CheckboxItem>
-              <TextArea
-                value={feedbackForm.satisfiedComment}
-                onChange={(e) => setFeedbackForm(prev => ({
-                  ...prev,
-                  satisfiedComment: e.target.value
-                }))}
-                placeholder="만족한점을 입력해주세요."
-              />
-            </CheckboxGroup>
-
-            <CheckboxGroup>
+              )}
+            </Section>
+            <Section>
               <Text bold style={{ marginBottom: '12px' }}>2. 불만족한점 (중복선택 가능)</Text>
-              <CheckboxItem>
-                <input
-                  type="checkbox"
-                  name="inappropriateSolution"
-                  checked={feedbackForm.unsatisfiedPoints.inappropriateSolution}
-                  onChange={(e) => setFeedbackForm(prev => ({
-                    ...prev,
-                    unsatisfiedPoints: {
-                      ...prev.unsatisfiedPoints,
-                      inappropriateSolution: e.target.checked
-                    }
-                  }))}
+              <RadioGroup
+                  value={dissatisfaction}
+                  onChange={(e) => setDissatisfaction(e.target.value)} 
+                  style={{ display: 'flex', flexDirection: 'vertical' }} >
+                  <FormControlLabel
+                    value="Painpoint 해소를 위한 제안이 적절하지 않음"
+                    control={<Radio />}
+                    label="Painpoint 해소를 위한 제안이 적절하지 않음"/>
+                  <FormControlLabel
+                    value="추천해준 전략이 너무 추상적임"
+                    control={<Radio />}
+                    label="추천해준 전략이 너무 추상적임"/>
+                  <FormControlLabel
+                    value="기업분석이 제대로 되지 않음"
+                    control={<Radio />}
+                    label="기업분석이 제대로 되지 않음"/>
+                  <FormControlLabel
+                    value="기타"
+                    label="기타"
+                    control={<Radio />}/>
+              </RadioGroup>
+                {dissatisfaction === "기타" && (
+                <TextField
+                  label="기타 사항을 입력해주세요"
+                  variant="outlined"
+                  fullWidth
+                  multiline
+                  rows={4}
+                  value={otherDissatisfaction}
+                  onChange={(e) => setOtherDissatisfaction(e.target.value)}
+                  style={{ marginTop: '16px' }}
                 />
-                <span>Painpoint 해소를 위한 제안이 적절하지 않음</span>
-              </CheckboxItem>
-              <CheckboxItem>
-                <input
-                  type="checkbox"
-                  name="tooAbstract"
-                  checked={feedbackForm.unsatisfiedPoints.tooAbstract}
-                  onChange={(e) => setFeedbackForm(prev => ({
-                    ...prev,
-                    unsatisfiedPoints: {
-                      ...prev.unsatisfiedPoints,
-                      tooAbstract: e.target.checked
-                    }
-                  }))}
-                />
-                <span>추천해준 전략이 너무 추상적임</span>
-              </CheckboxItem>
-              <CheckboxItem>
-                <input
-                  type="checkbox"
-                  name="poorAnalysis"
-                  checked={feedbackForm.unsatisfiedPoints.poorAnalysis}
-                  onChange={(e) => setFeedbackForm(prev => ({
-                    ...prev,
-                    unsatisfiedPoints: {
-                      ...prev.unsatisfiedPoints,
-                      poorAnalysis: e.target.checked
-                    }
-                  }))}
-                />
-                <span>기업분석이 제대로 되지 않음</span>
-              </CheckboxItem>
-              <CheckboxItem>
-                <input
-                  type="checkbox"
-                  name="unsatisfiedEtc"
-                  checked={feedbackForm.unsatisfiedPoints.unsatisfiedEtc}
-                  onChange={(e) => setFeedbackForm(prev => ({
-                    ...prev,
-                    unsatisfiedPoints: {
-                      ...prev.unsatisfiedPoints,
-                      unsatisfiedEtc: e.target.checked
-                    }
-                  }))}
-                />
-                <span>기타</span>
-              </CheckboxItem>
-              <TextArea
-                value={feedbackForm.unsatisfiedComment}
-                onChange={(e) => setFeedbackForm(prev => ({
-                  ...prev,
-                  unsatisfiedComment: e.target.value
-                }))}
-                placeholder="불만족한점을 입력해주세요."
-              />
-            </CheckboxGroup>
-
-            <div>
+              )}
+            </Section>
+            <Section>
               <Text bold style={{ marginBottom: '12px' }}>3. 추후에 컨설팅을 다시 받을 의향이 있으신가요?</Text>
-              <div style={{ display: 'flex', gap: '16px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <input
-                    type="radio"
-                    name="willConsultAgain"
-                    checked={feedbackForm.willConsultAgain}
-                    onChange={() => setFeedbackForm(prev => ({
-                      ...prev,
-                      willConsultAgain: true
-                    }))}
-                  />
-                  <span>있음</span>
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <input
-                    type="radio"
-                    name="willConsultAgain"
-                    checked={!feedbackForm.willConsultAgain}
-                    onChange={() => setFeedbackForm(prev => ({
-                      ...prev,
-                      willConsultAgain: false
-                    }))}
-                  />
-                  <span>없음</span>
-                </label>
-              </div>
-            </div>
-
-            <div>
+              <RadioGroup
+                  value={again}
+                  onChange={(e) => setAgain(e.target.value)}row
+                  style={{ display: 'flex', flexDirection: 'vertical' }} >
+                  <FormControlLabel
+                    value="있음"
+                    control={<Radio />}
+                    label="있음"/>
+                  <FormControlLabel
+                    value="없음"
+                    control={<Radio />}
+                    label="없음"/>
+              </RadioGroup>
+              </Section>
+              <Section>
               <Text bold style={{ marginBottom: '12px' }}>4. 다음 컨설팅에서 추가적으로 다루고 싶은 점이 있으신가요?</Text>
               <TextArea
-                value={feedbackForm.additionalComments}
-                onChange={(e) => setFeedbackForm(prev => ({
-                  ...prev,
-                  additionalComments: e.target.value
-                }))}
+                value={addition}
+                onChange={(e) => setAddition(e.target.value)}
                 placeholder="추가적으로 다루고 싶은 점을 입력해주세요."
               />
-            </div>
-
-            <SubmitButton onClick={handleSubmit}>
+              </Section>
+            <SubmitButton onClick={() => createSurvey(3)}>
               제출
             </SubmitButton>
           </FeedbackForm>
