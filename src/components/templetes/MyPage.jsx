@@ -121,6 +121,8 @@ const PriceText = styled(Text)`
 export const MyPage = () => {
   const theme = useTheme();
   const jwtToken = localStorage.getItem('token'); // 친구 변경 사항
+  const totalConsultings = localStorage.getItem('totalConsultings'); // 친구 변경 사항
+
   const [userData, setUserData] = useState(null);
   const [modalIsOpen, setModalIsOpen] = useState(false);  // 모달 상태 관리
   const [selectedPlan, setSelectedPlan] = useState('Basic'); // 기본값은 'Basic'으로 설정
@@ -133,7 +135,6 @@ export const MyPage = () => {
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user')); // 친구 변경 사항
     setUserData(user);
-    fetchInfoCount(user.userId); 
     if (user?.isPremium) {
       setSelectedPlan('Pro');
     } else {
@@ -141,32 +142,7 @@ export const MyPage = () => {
     }
   }, []);
 
-  const fetchInfoCount = async (userId) => {
-    try {
-      if (!userId) throw new Error('사용자 ID를 찾을 수 없습니다');
-      console.log(userId);
-      const response = await fetch('http://localhost:8080/user/additional/count', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${jwtToken}`, // 친구 변경 사항
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId }), // userId를 요청 본문에 담아서 전송
-      });
 
-      if (!response.ok) {
-        throw new Error('총 개수를 가져오는 데 실패했습니다');
-      }
-
-      const data = await response.json();
-      setConsultingStats((prevStats) => ({
-        ...prevStats,
-        total: data.count // Update the total count here
-      }));
-    } catch (err) {
-      console.error(err.message);
-    }
-  };
   const handlePlanChange = async (plan) => {
     setSelectedPlan(plan);
     const isPremium = plan === 'Pro';
@@ -263,7 +239,7 @@ export const MyPage = () => {
           <ConsultingCount>
             <Text color="#666" fontSize="14px">전체 진행 횟수</Text>
             <Text bold fontSize="20px" color="#2F56C7">
-              {consultingStats.total}회
+              {totalConsultings}회
             </Text>
           </ConsultingCount>
         </ProfileDetails>
