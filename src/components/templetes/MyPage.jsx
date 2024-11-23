@@ -184,10 +184,10 @@ export const MyPage = () => {
 
   // 컨설팅 데이터 (그래프용)
   const chartData = [
-    { name: '1회차 컨설팅', value: 270 },
-    { name: '2회차 컨설팅', value: 320 },
-    { name: '3회차 컨설팅', value: 330 },
-    { name: '4회차 컨설팅', value: 360 },
+    { name: '1회차 컨설팅', value: 270, line: 270 },
+    { name: '2회차 컨설팅', value: 320, line: 320 },
+    { name: '3회차 컨설팅', value: 330, line: 330 },
+    { name: '4회차 컨설팅', value: 360, line: 360 },
   ];
   return (
     <Stack
@@ -245,6 +245,48 @@ export const MyPage = () => {
         </ProfileDetails>
         <ViewButton onClick={openModal}>요금제 변경</ViewButton> {/* 닫는 태그 추가 */}
       </ProfileSection>
+
+      {/* 컨설팅 내역 섹션 추가 */}
+      <ConsultingSection>
+        <Text bold fontSize="16px" style={{ marginBottom: '16px', textAlign: 'left' }}>
+          매출액 변화
+        </Text>
+
+        {/* 차트 컨테이너 */}
+        <ChartContainer>
+          <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Legend 
+                payload={[
+                  { value: '매출액', type: 'rect', color: '#2F56C7' },
+                  { value: '선형 (매출액)', type: 'line', color: '#666666' }
+                ]}
+              />
+              <Bar 
+                dataKey="value" 
+                fill="#2F56C7" 
+                barSize={55}
+                label={{ 
+                  position: 'top',
+                  fill: '#666666',
+                  fontSize: 12
+                }}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="line" 
+                stroke="#666666" 
+                strokeDasharray="5 5" 
+                dot={{ fill: '#666666' }}
+              />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </ChartContainer>
+      </ConsultingSection>
     </Stack>
   )
 }
