@@ -258,7 +258,7 @@ export const MyPage = () => {
             <ComposedChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
-              <YAxis />
+              <YAxis domain={[0, 450]} />
               <Tooltip />
               <Legend 
                 payload={[
@@ -273,7 +273,9 @@ export const MyPage = () => {
                 label={{ 
                   position: 'top',
                   fill: '#666666',
-                  fontSize: 12
+                  fontSize: 12,
+                  formatter: (value) => `${value}`,
+                  dy: -10
                 }}
               />
               <Line 
