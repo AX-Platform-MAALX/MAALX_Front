@@ -2,6 +2,7 @@ import { Stack, useTheme } from '@mui/system';
 import { Button, Text } from '../components/atoms/index.js';
 import styled from '@emotion/styled';
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom'; // useParams를 import
 
 const ResultContainer = styled.div`
     padding: 20px;
@@ -71,77 +72,50 @@ const SubSection = styled(Stack)`
 export const ConsultingPage = () => {
     const theme = useTheme();
     const [activeTab, setActiveTab] = useState('요약본');
-    const [consultingData, setConsultingData] = useState(null);
+    const { consultingIndex } = useParams(); // URL에서 consultingIndex 추출
     const [userPlan, setUserPlan] = useState('Basic');
+    const [consultingHistory, setConsultingHistory] = useState([]);
+    const [selectedResponseContent, setSelectedResponseContent] = useState(""); // responseContent 상태 추가
 
     useEffect(() => {
         // localStorage에서 컨설팅 데이터와 사용자 요금제 정보 가져오기
-        const storedData = localStorage.getItem('consultingData');
-        const storedPlan = localStorage.getItem('userPlan');
-        
-        console.log('Stored Data:', storedData); // 디버깅용 로그
-        console.log('Stored Plan:', storedPlan); // 디버깅용 로그
-        
-        if (storedData) {
-            setConsultingData(JSON.parse(storedData));
+        const storedUser = localStorage.getItem('user'); // 예: {nickname: "최영서", userId: 1, isPremium: true}
+        const storedConsultingHistory = localStorage.getItem('consultingHistory');
+        console.log('consultingIndex:', consultingIndex);  // 디버깅: consultingIndex 출력
+
+        if (storedUser) {
+            const user = JSON.parse(storedUser);
+            // isPremium 값에 따라 userPlan 설정
+            setUserPlan(user.isPremium ? 'Pro' : 'Basic');
         }
-        if (storedPlan) {
-            setUserPlan(storedPlan);
+        if (storedConsultingHistory) {
+            const history = JSON.parse(storedConsultingHistory);
+            setConsultingHistory(history);
+
+            // consultingIndex가 URL에서 추출된 값이므로, 이를 사용하여 해당 항목을 찾아 responseContent 설정
+            if (consultingIndex) {
+                const selectedContent = history.find(item => item.consultingIndex.toString() === consultingIndex);
+                console.log('selectedContent:', selectedContent);  // 디버깅: selectedContent 값 출력
+
+                if (selectedContent) {
+                    setSelectedResponseContent(selectedContent.responseContent);
+                }
+            }
         }
-    }, []);
+    }, [consultingIndex]); // consultingIndex가 변경될 때마다 호출
+
+
 
     const renderBasicContent = () => (
         <Stack spacing={2}>
-            <Text bold fontSize="18px">[요약본]</Text>
-            <Text>
-                {consultingData?.companyName}는 {consultingData?.technologyField}을 중심으로 한 성장형 IT 기업으로, 
-                현재 매출액은 {consultingData?.revenue}원이며, {consultingData?.employeeCount}명의 직원을 보유하고 있습니다.
-            </Text>
-            <Text>
-                기업이 직면한 주요 과제는 {consultingData?.painPoint}이며, 
-                이를 위해 {consultingData?.preferredAITech} 기술 도입을 계획하고 있습니다.
-            </Text>
+            
         </Stack>
     );
 
     const renderProContent = () => (
         <Stack spacing={3}>
             <Text bold fontSize="18px">[전문]</Text>
-            <Stack spacing={2}>
-                <Text bold>1. 현재 AI 분석 및 평가의 분석</Text>
-                <Text>
-                    {consultingData?.companyName}가 보유한 AI 관련 분야 사업에서는 AI분석 경험(UX)을 향상시키기 위한 AI 기술의 도입이 증가하고 있습니다. 현재 기업의 주요 기술 스택은 다음과 같습니다:
-                </Text>
-                <Text>
-                    • {consultingData?.technologyField}
-                    • AI 및 머신러닝 기술
-                    • 데이터 분석 및 처리 시스템
-                </Text>
-            </Stack>
-            <Stack spacing={2}>
-                <Text bold>2. 문제점 해결하기 위한 계획</Text>
-                <Text>
-                    • {consultingData?.painPoint} 해결을 위한 계획
-                    • {consultingData?.preferredAITech} 기술 도입
-                    • 데이터 기반 의사결정 시스템 도입
-                </Text>
-            </Stack>
-            <Stack spacing={2}>
-                <Text bold>3. 기대효과</Text>
-                <Text>
-                    • 고객 서비스 품질 향상
-                    • 운영 비용 절감
-                    • 데이터 기반 의사결정 강화
-                </Text>
-            </Stack>
-            <Stack spacing={2}>
-                <Text bold>4. 향후 발전 방향</Text>
-                <Text>
-                    • AI 기술 고도화를 통한 서비스 품질 향상
-                    • 글로벌 시장 진출을 위한 기술 경쟁력 확보
-                    • 지속 가능한 성장을 위한 R&D 투자 확대
-                </Text>
-            </Stack>
+            <Text>{selectedResponseContent}</Text> {/* 전체 내용 표시 */}
         </Stack>
     );
 
@@ -154,13 +128,12 @@ export const ConsultingPage = () => {
                 padding: theme.spacing(4)
             }}
         >
-            <Text bold fontSize="24px">컨설팅 결과</Text>
+            <Text bold style={{fontSize:"24px"}}>컨설팅 결과</Text>
             
             <TabContainer>
                 <Tab 
                     active={activeTab === '요약본'} 
-                    onClick={() => setActiveTab('요약본')}
-                >
+                    onClick={() => setActiveTab('요약본')}                >
                     요약본
                 </Tab>
                 {userPlan === 'Pro' && (
@@ -174,7 +147,7 @@ export const ConsultingPage = () => {
                 <PDFButton>PDF 다운로드</PDFButton>
             </TabContainer>
 
-            <ResultContainer>
+            <ResultContainer style={{ width: '700px'}}> {/* 여기서 가로 길이를 고정 */}
                 {activeTab === '요약본' ? renderBasicContent() : renderProContent()}
             </ResultContainer>
         </Stack>

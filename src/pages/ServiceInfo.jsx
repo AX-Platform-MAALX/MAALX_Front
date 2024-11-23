@@ -67,7 +67,7 @@ export const ServiceInfoPage = () => {
 
     const handleSubmit = async () => {
         const parsedRevenue = parseFloat(revenue);
-        const jwtToken = localStorage.getItem('token');
+        const token = localStorage.getItem('token');
         
         // 사용자 정보를 state로 저장하여 Consulting 페이지로 전달
         const consultingData = {
@@ -89,11 +89,11 @@ export const ServiceInfoPage = () => {
         localStorage.setItem('userPlan', userPlan);
 
         try {
-            if (jwtToken) {  // 토큰이 있을 때만 백엔드 통신 시도
+            if (token) {  // 토큰이 있을 때만 백엔드 통신 시도
                 const response = await fetch('http://localhost:8080/user/additional', {
                     method: 'PUT',
                     headers: {
-                        'Authorization': `Bearer ${jwtToken}`,
+                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
@@ -101,18 +101,37 @@ export const ServiceInfoPage = () => {
                         date: new Date().toISOString().split('T')[0]
                     })
                 });
-
+                console.log(response);  // 응답 내용 확인
                 if (!response.ok) {
-                    console.error('Backend communication failed');
+                    console.error('기업정보 저장에 실패했습니다.');
                 }
+                // 기업정보 저장 성공 알림
+                alert("기업정보가 성공적으로 저장되었습니다.");
+                 // 2. 컨설팅 요청 (POST 요청)
+                const consultingResponse = await fetch("http://localhost:8080/consulting/request", {
+                    method: "GET",  // 컨설팅 요청은 GET 방식으로 처리하는 API로 수정
+                    headers: {
+                        "Authorization": `Bearer ${token}`, // 인증 토큰을 헤더에 추가
+                    },
+                });
+
+                if (!consultingResponse.ok) {
+                    throw new Error("컨설팅 요청에 실패했습니다.");
+                }
+
+                // 컨설팅 요청 성공 알림
+                alert("컨설팅 요청이 성공적으로 처리되었습니다.");
+                const consultingDataResponse = await consultingResponse.json();
+            console.log("컨설팅 결과:", consultingDataResponse);
             }
         } catch (error) {
             console.error('Error:', error);
-        } finally {
-            // 백엔드 통신 성공 여부와 관계없이 페이지 이동
-            console.log('Navigating to consulting page...');
-            navigate('/consulting');
-        }
+        } 
+        // finally {
+        //     // 백엔드 통신 성공 여부와 관계없이 페이지 이동
+        //     console.log('Navigating to consulting page...');
+        //     navigate('/consulting');
+        // }
     };
     return (
         <div>
@@ -252,7 +271,7 @@ export const ServiceInfoPage = () => {
                     </SubSection>
                     <SubSection>
                         <Text bold>2-5. detailed demand</Text>
-                        <Input
+                        <TextArea
                             value={detailedDemand}
                             onChange={(e) => setDetailedDemand(e.target.value)}
                             placeholder="구체적인 요구사항을 입력해주세요"
@@ -263,7 +282,7 @@ export const ServiceInfoPage = () => {
         </Stack>
         <Button
             style={{
-                width: '18%',
+                width: '350px',
                 borderRadius: '4px',
                 height: '80px',  // 세로 길이를 명시적으로 설정
                 padding: '23px 20px',  // 위아래 패딩을 늘려서 높이를 증가시킴

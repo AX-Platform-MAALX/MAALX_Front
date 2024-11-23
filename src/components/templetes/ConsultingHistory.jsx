@@ -151,14 +151,12 @@ export const ConsultingHistory = () => {
       if (!response.ok) {
         throw new Error('컨설팅 내역을 가져오는 데 실패했습니다.');
       }
-
       const data = await response.json();
       console.log(data);
       setConsultingHistory(data);  // 가져온 데이터로 state 업데이트
       setConsultingTotal(data.length); // 전체 컨설팅 횟수 계산
       localStorage.setItem('consultingHistory', JSON.stringify(data));
       localStorage.setItem('totalConsultings', JSON.stringify(data.length));
-
     } catch (error) {
       console.error(error.message);
     }
@@ -167,8 +165,10 @@ export const ConsultingHistory = () => {
   fetchConsultingHistory();
   }, [navigate]);
 
-  const handleViewReport = (id) => {
-    navigate(`/consulting/${id}`);
+  const handleViewReport = (consultingIndex) => {
+    console.log("Selected Consulting Index:", consultingIndex);
+    // consultingIndex를 함께 URL에 전달하여 consulting 페이지로 이동
+    navigate(`/consulting/${consultingIndex}`);
   };
   const createSurvey = async (consultingResponseId) => {
     try {
@@ -184,7 +184,7 @@ export const ConsultingHistory = () => {
         addition: addition,
       };      
   
-      const response = await fetch(`http://localhost:8080/survey/create/${consultingResponseId}`, {
+      const response = await fetch(`http://localhost:8080/survey/create/${consultingHistory.id}`, {
         method: "POST",
         headers: headers,
         body: JSON.stringify(surveyRequestDto),
@@ -213,7 +213,7 @@ export const ConsultingHistory = () => {
   const handleSubmit = async () => {
     const token = localStorage.getItem('token');
     try {
-      await createSurvey(2, surveyRequestDto,token);
+      await createSurvey(selectedConsulting.id);
       setModalIsOpen(false);
       setConsultingHistory((prev) =>
         prev.map((item) =>
@@ -274,8 +274,11 @@ export const ConsultingHistory = () => {
               <Text>날짜</Text>
               <Text>피드백</Text>
             </TableHeader>
-            {consultingHistory.map((consulting,index) => (
-              <TableRow key={consulting.id}>
+            {consultingHistory.map((consulting, index) => (
+            <TableRow 
+              key={consulting.id}
+              onClick={() => handleViewReport(consulting.consultingIndex)}  // 행 클릭 시 컨설팅 페이지로 이동
+            >
                 <Text>{index + 1}</Text>
                 <Text bold>{index + 1}회차 컨설팅 결과</Text>
                 <Text>{consulting.createdAt}</Text>
@@ -427,9 +430,9 @@ export const ConsultingHistory = () => {
                 placeholder="추가적으로 다루고 싶은 점을 입력해주세요."
               />
               </Section>
-            <SubmitButton onClick={() => createSurvey(3)}>
-              제출
-            </SubmitButton>
+              <SubmitButton onClick={handleSubmit}>
+                제출
+              </SubmitButton>
           </FeedbackForm>
         </FeedbackModal>
       </Modal>
