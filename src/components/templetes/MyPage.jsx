@@ -120,12 +120,12 @@ const PriceText = styled(Text)`
 `;
 export const MyPage = () => {
   const theme = useTheme();
-  const jwtToken = localStorage.getItem('token'); // 친구 변경 사항
-  const totalConsultings = localStorage.getItem('totalConsultings'); // 친구 변경 사항
-
+  const navigate = useNavigate();
+  const token = localStorage.getItem('token'); 
   const [userData, setUserData] = useState(null);
   const [modalIsOpen, setModalIsOpen] = useState(false);  // 모달 상태 관리
   const [selectedPlan, setSelectedPlan] = useState('Basic'); // 기본값은 'Basic'으로 설정
+  const [consultingTotal, setConsultingTotal] = useState(0); // total을 상태로 관리
   const [consultingStats, setConsultingStats] = useState({
     total: 0,
     completed: 4,
@@ -133,15 +133,35 @@ export const MyPage = () => {
   });
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user')); // 친구 변경 사항
+    const user = JSON.parse(localStorage.getItem('user')); 
     setUserData(user);
     if (user?.isPremium) {
       setSelectedPlan('Pro');
     } else {
       setSelectedPlan('Basic');
     }
-  }, []);
-
+    
+  const fetchConsultingHistory = async () => {
+    try {
+      const response = await fetch(`http://localhost:8080/consulting/user/${user.userId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('컨설팅 내역을 가져오는 데 실패했습니다.');
+      }
+      const data = await response.json();
+      console.log(data);
+      setConsultingTotal(data.length); // 전체 컨설팅 횟수 계산
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+  fetchConsultingHistory();
+  }, [navigate]);;
 
   const handlePlanChange = async (plan) => {
     setSelectedPlan(plan);
@@ -151,7 +171,7 @@ export const MyPage = () => {
       const response = await fetch('http://localhost:8080/user/upgrade', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${jwtToken}`, // 친구 변경 사항
+          'Authorization': `Bearer ${token}`, 
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ isPremium }),
@@ -161,12 +181,21 @@ export const MyPage = () => {
       }
       const data = await response.json();
       console.log('회원 상태 변경 성공:', data);
+      // 로컬스토리지의 user 데이터를 업데이트
+      const updatedUser = JSON.parse(localStorage.getItem('user'));
+      updatedUser.isPremium = isPremium;  // isPremium 값을 업데이트
+
+      // 업데이트된 user 데이터를 로컬스토리지에 다시 저장
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      // const updatedUser = { ...userData, isPremium };  // 기존 userData를 복사하고, isPremium만 업데이트
+      setUserData(updatedUser);  // userData 상태 업데이트
     } catch (error) {
       console.error('회원 상태 변경 실패:', error);
     }
   };
   // 모달 열기
   const openModal = () => {
+    console.log('요금제 변경 버튼 클릭됨');
     setModalIsOpen(true);
   };
       
@@ -181,7 +210,6 @@ export const MyPage = () => {
     { date: '2024.02.01', title: '컨설팅 진행 현황', status: '완료됨' },
     { date: '2024.01.15', title: '컨설팅 진행 현황', status: '완료됨' },
   ];
-
   // 컨설팅 데이터 (그래프용)
   const chartData = [
     { name: '1회차 컨설팅', value: 270, line: 270 },
@@ -189,6 +217,8 @@ export const MyPage = () => {
     { name: '3회차 컨설팅', value: 330, line: 330 },
     { name: '4회차 컨설팅', value: 360, line: 360 },
   ];
+  const totalConsultings = consultingTotal;
+
   return (
     <Stack
       spacing={3}
@@ -245,7 +275,67 @@ export const MyPage = () => {
         </ProfileDetails>
         <ViewButton onClick={openModal}>요금제 변경</ViewButton> {/* 닫는 태그 추가 */}
       </ProfileSection>
-
+{/* 모달 */}
+<Modal
+          isOpen={modalIsOpen}
+          onRequestClose={closeModal}
+          contentLabel="요금제 변경"
+          style={{
+            overlay: {
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',  // 모달 배경
+            },
+            content: {
+              width: '430px',
+              height: '300px',
+              margin: 'auto',
+              padding: '20px',
+              textAlign: 'center',
+              borderRadius: '8px',
+              background: '#fff',
+            },
+          }}
+        >
+          <Stack spacing={4}>
+                    <Text bold>요금제 변경</Text>
+                    <RadioGroup>
+                        <PlanCard checked={selectedPlan === 'Basic'}>
+                            <input 
+                                type="radio" 
+                                name="plan" 
+                                value="Basic" 
+                                checked={selectedPlan === 'Basic'}
+                                onChange={(e) => {
+                                    setSelectedPlan(e.target.value);}}
+                            />
+                            <Text bold fontSize="20px">Basic</Text>
+                            <Text fontSize="18px">무료</Text>
+                            <Text style={{ marginTop: '12px' }}>• 요약본 제공</Text>
+                        </PlanCard>
+                        <PlanCard checked={selectedPlan === 'Pro'}>
+                            <input 
+                                type="radio" 
+                                name="plan" 
+                                value="Pro"
+                                checked={selectedPlan === 'Pro'}
+                                onChange={(e) => {
+                                    setSelectedPlan(e.target.value);}}
+                            />
+                            <Text bold fontSize="20px">Pro</Text>
+                            <PriceText>￦ 1000</PriceText>
+                            <Text>• 전문 제공</Text>
+                            <Text>• 문제분석과 계획 제공</Text>
+                        </PlanCard>
+                    </RadioGroup>
+                </Stack>
+          <div>
+          <button
+            onClick={() => {
+              handlePlanChange(selectedPlan);
+              closeModal();
+            }} 
+            style={{ padding: '10px', marginTop: '20px', backgroundColor: '#2F56C7', color: '#fff', border: 'none', borderRadius: '4px' }}>변경</button>
+        </div>
+      </Modal>
       {/* 컨설팅 내역 섹션 추가 */}
       <ConsultingSection>
         <Text bold fontSize="16px" style={{ marginBottom: '16px', textAlign: 'left' }}>
