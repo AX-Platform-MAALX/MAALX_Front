@@ -48,7 +48,7 @@ const ConsultingSection = styled.div`
 
 const ChartContainer = styled.div`
   width: 100%;
-  height: 400px;
+  height: 500px;
   margin: 24px 0;
 `;
 
@@ -258,7 +258,11 @@ export const MyPage = () => {
             <ComposedChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
-              <YAxis domain={[0, 450]} />
+              <YAxis 
+                domain={[0, 450]}
+                ticks={[0, 50, 100, 150, 200, 250, 300, 350, 400, 450]} // 50 단위로 눈금 설정
+                interval={0} // 모든 눈금을 표시
+              />
               <Tooltip />
               <Legend 
                 payload={[
