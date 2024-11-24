@@ -132,7 +132,7 @@ export const ConsultingHistory = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user')); // 친구 변경 사항
+    const user = JSON.parse(localStorage.getItem('user'));
     if (!token) {
       navigate('/login');
       return;
@@ -140,7 +140,7 @@ export const ConsultingHistory = () => {
   // API 호출하여 userId에 맞는 컨설팅 내역을 가져오기
   const fetchConsultingHistory = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/consulting/user/${user.userId}`, {
+      const response = await fetch(`http://localhost:8080/consulting`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -220,7 +220,7 @@ export const ConsultingHistory = () => {
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async () => { 
     if (!selectedConsulting || !selectedConsulting.id) {
       console.error("선택된 컨설팅이 없습니다.");
       return;
@@ -335,7 +335,7 @@ export const ConsultingHistory = () => {
             • 총 진행 횟수: {totalConsultings}회
           </Text>
           <Text style={{ marginBottom: '8px' }}>
-            • 최근 컨설팅: {latestConsulting}
+            • 최근 컨설팅: {formatDate(latestConsulting)}
           </Text>
           <Text>
             • 다음 예정 컨설팅: {nextConsulting}

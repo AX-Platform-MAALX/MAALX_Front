@@ -111,9 +111,12 @@ export const Header = () => {
 						onClick={handleProfileClick} 
 						/>
 						<DropdownMenu isOpen={isDropdownOpen}>
-						<DropdownItem to="/mypage" >마이페이지</DropdownItem>
-						<DropdownItem to="/consulting-history">컨설팅 기록</DropdownItem>
-						<DropdownItem as="div" onClick={handleLogout}>로그아웃</DropdownItem>
+						<DropdownItem to="/mypage" onClick={() => setIsDropdownOpen(false)} >마이페이지</DropdownItem>
+						<DropdownItem to="/consulting-history" onClick={() => setIsDropdownOpen(false)}>컨설팅 기록</DropdownItem>
+						<DropdownItem as="div" onClick={() => {
+							handleLogout(); 
+							setIsDropdownOpen(false); // 로그아웃 시 DropdownMenu 닫기
+						}}>로그아웃</DropdownItem>
 						</DropdownMenu>
 					</Stack>
 					) : (

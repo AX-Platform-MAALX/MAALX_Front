@@ -64,6 +64,7 @@ export const ServiceInfoPage = () => {
     const [consultingField, setConsultingField] = useState('');
     const [aiNeeds, setAiNeeds] = useState('');
     const [detailedDemand, setDetailedDemand] = useState('');
+    const [isLoading, setIsLoading] = useState(false); // 로딩 상태 추가
 
     const handleSubmit = async () => {
         const parsedRevenue = parseFloat(revenue);
@@ -107,6 +108,7 @@ export const ServiceInfoPage = () => {
                 }
                 // 기업정보 저장 성공 알림
                 alert("기업정보가 성공적으로 저장되었습니다.");
+                navigate('/consulting-history');
                  // 2. 컨설팅 요청 (POST 요청)
                 const consultingResponse = await fetch("http://localhost:8080/consulting/request", {
                     method: "GET",  // 컨설팅 요청은 GET 방식으로 처리하는 API로 수정
@@ -119,10 +121,12 @@ export const ServiceInfoPage = () => {
                     throw new Error("컨설팅 요청에 실패했습니다.");
                 }
 
+                const consultingDataResponse = await consultingResponse.json();
+                console.log("컨설팅 결과:", consultingDataResponse);
+                
                 // 컨설팅 요청 성공 알림
                 alert("컨설팅 요청이 성공적으로 처리되었습니다.");
-                const consultingDataResponse = await consultingResponse.json();
-            console.log("컨설팅 결과:", consultingDataResponse);
+                window.location.reload(); // 화면 새로고침
             }
         } catch (error) {
             console.error('Error:', error);
