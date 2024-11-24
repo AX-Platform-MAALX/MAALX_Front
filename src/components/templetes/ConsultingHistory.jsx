@@ -172,19 +172,29 @@ export const ConsultingHistory = () => {
   };
   const createSurvey = async (consultingResponseId) => {
     try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("인증 토큰이 없습니다.");
+        return;
+      }
+  
       const headers = {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Authorization: `Bearer ${token}`,
       };
   
+      // 설문 데이터 준비
       const surveyRequestDto = {
-        satisfaction: satisfaction === "기타" ? otherSatisfaction : satisfaction,
-        dissatisfaction: dissatisfaction === "기타" ? otherDissatisfaction : dissatisfaction,
-        again: again,
-        addition: addition,
-      };      
+        satisfaction: satisfaction === "기타" ? otherSatisfaction.trim() : satisfaction,
+        dissatisfaction: dissatisfaction === "기타" ? otherDissatisfaction.trim() : dissatisfaction,
+        again: again || "없음",
+        addition: addition.trim() || "없음",
+      };
   
-      const response = await fetch(`http://localhost:8080/survey/create/${consultingHistory.id}`, {
+      console.log("설문 데이터:", surveyRequestDto);
+  
+      // API 요청
+      const response = await fetch(`http://localhost:8080/survey/create/${consultingResponseId}`, {
         method: "POST",
         headers: headers,
         body: JSON.stringify(surveyRequestDto),
@@ -198,10 +208,10 @@ export const ConsultingHistory = () => {
   
       const data = await response.json();
       console.log("설문조사 생성 성공:", data);
+      return data; // 생성된 설문 데이터 반환
     } catch (error) {
       console.error("네트워크 오류:", error.message);
     }
-    setModalIsOpen(false);
   };
   const handleFeedbackClick = (consulting) => {
     if (!consulting.feedbackStatus) {
@@ -211,22 +221,38 @@ export const ConsultingHistory = () => {
   };
 
   const handleSubmit = async () => {
-    const token = localStorage.getItem('token');
+    if (!selectedConsulting || !selectedConsulting.id) {
+      console.error("선택된 컨설팅이 없습니다.");
+      return;
+    }
     try {
+      console.log("선택된 컨설팅 ID:", selectedConsulting.id);
+      // 설문 생성
       await createSurvey(selectedConsulting.id);
-      setModalIsOpen(false);
+      // 상태 업데이트: 피드백 완료로 표시
       setConsultingHistory((prev) =>
         prev.map((item) =>
-          item.id === selectedConsulting.id
-            ? { ...item, feedbackStatus: true }
-            : item
+          item.id === selectedConsulting.id ? { ...item, feedbackStatus: true } : item
         )
       );
+      // 로컬스토리지에 상태 저장
+      localStorage.setItem(
+      'consultingHistory',
+      JSON.stringify(
+        consultingHistory.map((item) =>
+          item.id === selectedConsulting.id ? { ...item, feedbackStatus: true } : item
+        )
+      )
+    );
+      // 모달 닫기
+      setModalIsOpen(false);
     } catch (error) {
-      console.error('설문 제출 실패:', error);
+      console.error("설문 제출 실패:", error.message);
     }
+  };;
+  const formatDate = (dateString) => {
+    return dateString.split('T')[0]; // 'T'를 기준으로 나누고 첫 번째 부분(날짜)만 반환
   };
-
   const totalConsultings = consultingTotal;
   const latestConsulting = consultingHistory.length > 0
   ? consultingHistory[consultingHistory.length - 1].createdAt: '없음'; // 가장 최근의 컨설팅 날짜를 가져옵니다.  const nextConsulting = '없음';
@@ -281,11 +307,13 @@ export const ConsultingHistory = () => {
             >
                 <Text>{index + 1}</Text>
                 <Text bold>{index + 1}회차 컨설팅 결과</Text>
-                <Text>{consulting.createdAt}</Text>
+                <Text>{formatDate(consulting.createdAt)}</Text>
                 <FeedbackStatus 
                   isCompleted={consulting.feedbackStatus}
-                  onClick={() => handleFeedbackClick(consulting)}
-                >
+                  onClick={(e) => {
+                    e.stopPropagation(); // 이벤트 전파 중지
+                    handleFeedbackClick(consulting);
+                  }}                >
                   {consulting.feedbackStatus ? '피드백 완료' : '피드백 미완료'}
                 </FeedbackStatus>
               </TableRow>
