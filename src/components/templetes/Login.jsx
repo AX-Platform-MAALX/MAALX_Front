@@ -50,11 +50,11 @@ export const Login = () => {
                 localStorage.setItem('isLoggedIn', 'true')
 
             } else {
-                setErrorMessage(data.message || '로그인 실패');
+                setErrorMessage('로그인에 실패하였습니다');
             }
         } catch (error) {
             console.error("에러:", error);
-            setErrorMessage('서버와의 연결에 실패했습니다.');
+            setErrorMessage('로그인에 실패하였습니다');
         }
     };
     const handleLoginSuccess = () => {
@@ -88,6 +88,11 @@ export const Login = () => {
                     onChange={handleChange}
                 />            
             </Stack>
+            {errorMessage && (
+                <Text style={{ color: 'red', fontSize: '14px', marginTop: '8px' }}>
+                    {errorMessage}
+                </Text>
+            )}
             <Button style={{ width: '100%',fontSize:'16px' }} onClick={handleSubmit}>로그인</Button>
             <Text 
                 style={{ cursor: 'pointer',fontSize:'17px' }}
