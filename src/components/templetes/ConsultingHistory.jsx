@@ -387,7 +387,7 @@ console.log('Response:', response);
 						</Text>
 						<Section>
 							<Text bold style={{ marginBottom: '12px' }}>
-								1. 만족한점 (중복선택 가능)
+								1. 만족한점 
 							</Text>
 							<RadioGroup
 								value={satisfaction}
@@ -426,7 +426,7 @@ console.log('Response:', response);
 						</Section>
 						<Section>
 							<Text bold style={{ marginBottom: '12px' }}>
-								2. 불만족한점 (중복선택 가능)
+								2. 불만족한점 
 							</Text>
 							<RadioGroup
 								value={dissatisfaction}
