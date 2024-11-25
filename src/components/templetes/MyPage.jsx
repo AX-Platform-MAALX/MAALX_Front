@@ -347,9 +347,10 @@ export const MyPage = () => {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis 
-                domain={[0, Math.max(...chartData.map(item => item.value))]} // 데이터에 맞게 Y축 범위 자동 설정
+                domain={[0, Math.max(...chartData.map(item => item.value))* 1.1]}// 데이터에 맞게 Y축 범위 자동 설정
                 tickFormatter={(value) => `${(value / 100000000).toFixed(1)}억`} // 억 단위로 변환
                 interval={0} // 모든 눈금을 표시
+                padding={{ top: 20 }}
               />
 
               <Tooltip />
