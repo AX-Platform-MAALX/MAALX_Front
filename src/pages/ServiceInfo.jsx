@@ -299,7 +299,8 @@ export const ServiceInfoPage = () => {
                 alignItems: 'center', // 수직 가운데 정렬
                 display: 'flex', // flex 레이아웃을 적용
                 justifyContent: 'center', // 수평 가운데 정렬
-                fontSize: '15px'
+                fontSize: '15px',
+                cursor: 'pointer'
             }}
             onMouseEnter={(e) => {
                 e.target.style.backgroundColor = '#2F56C7'; // 마우스가 올라갔을 때 배경색 파란색
