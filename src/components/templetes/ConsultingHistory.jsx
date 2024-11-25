@@ -132,7 +132,7 @@ export const ConsultingHistory = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user')); // 친구 변경 사항
+    const user = JSON.parse(localStorage.getItem('user'));
     if (!token) {
       navigate('/login');
       return;
@@ -140,7 +140,7 @@ export const ConsultingHistory = () => {
   // API 호출하여 userId에 맞는 컨설팅 내역을 가져오기
   const fetchConsultingHistory = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/consulting/user/${user.userId}`, {
+      const response = await fetch(`http://localhost:8080/consulting`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -151,14 +151,12 @@ export const ConsultingHistory = () => {
       if (!response.ok) {
         throw new Error('컨설팅 내역을 가져오는 데 실패했습니다.');
       }
-
       const data = await response.json();
       console.log(data);
       setConsultingHistory(data);  // 가져온 데이터로 state 업데이트
       setConsultingTotal(data.length); // 전체 컨설팅 횟수 계산
       localStorage.setItem('consultingHistory', JSON.stringify(data));
       localStorage.setItem('totalConsultings', JSON.stringify(data.length));
-
     } catch (error) {
       console.error(error.message);
     }
@@ -167,23 +165,35 @@ export const ConsultingHistory = () => {
   fetchConsultingHistory();
   }, [navigate]);
 
-  const handleViewReport = (id) => {
-    navigate(`/consulting/${id}`);
+  const handleViewReport = (consultingIndex) => {
+    console.log("Selected Consulting Index:", consultingIndex);
+    // consultingIndex를 함께 URL에 전달하여 consulting 페이지로 이동
+    navigate(`/consulting/${consultingIndex}`);
   };
   const createSurvey = async (consultingResponseId) => {
     try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("인증 토큰이 없습니다.");
+        return;
+      }
+  
       const headers = {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Authorization: `Bearer ${token}`,
       };
   
+      // 설문 데이터 준비
       const surveyRequestDto = {
-        satisfaction: satisfaction === "기타" ? otherSatisfaction : satisfaction,
-        dissatisfaction: dissatisfaction === "기타" ? otherDissatisfaction : dissatisfaction,
-        again: again,
-        addition: addition,
-      };      
+        satisfaction: satisfaction === "기타" ? otherSatisfaction.trim() : satisfaction,
+        dissatisfaction: dissatisfaction === "기타" ? otherDissatisfaction.trim() : dissatisfaction,
+        again: again || "없음",
+        addition: addition.trim() || "없음",
+      };
   
+      console.log("설문 데이터:", surveyRequestDto);
+  
+      // API 요청
       const response = await fetch(`http://localhost:8080/survey/create/${consultingResponseId}`, {
         method: "POST",
         headers: headers,
@@ -198,10 +208,10 @@ export const ConsultingHistory = () => {
   
       const data = await response.json();
       console.log("설문조사 생성 성공:", data);
+      return data; // 생성된 설문 데이터 반환
     } catch (error) {
       console.error("네트워크 오류:", error.message);
     }
-    setModalIsOpen(false);
   };
   const handleFeedbackClick = (consulting) => {
     if (!consulting.feedbackStatus) {
@@ -210,23 +220,39 @@ export const ConsultingHistory = () => {
     }
   };
 
-  const handleSubmit = async () => {
-    const token = localStorage.getItem('token');
+  const handleSubmit = async () => { 
+    if (!selectedConsulting || !selectedConsulting.id) {
+      console.error("선택된 컨설팅이 없습니다.");
+      return;
+    }
     try {
-      await createSurvey(2, surveyRequestDto,token);
-      setModalIsOpen(false);
+      console.log("선택된 컨설팅 ID:", selectedConsulting.id);
+      // 설문 생성
+      await createSurvey(selectedConsulting.id);
+      // 상태 업데이트: 피드백 완료로 표시
       setConsultingHistory((prev) =>
         prev.map((item) =>
-          item.id === selectedConsulting.id
-            ? { ...item, feedbackStatus: true }
-            : item
+          item.id === selectedConsulting.id ? { ...item, feedbackStatus: true } : item
         )
       );
+      // 로컬스토리지에 상태 저장
+      localStorage.setItem(
+      'consultingHistory',
+      JSON.stringify(
+        consultingHistory.map((item) =>
+          item.id === selectedConsulting.id ? { ...item, feedbackStatus: true } : item
+        )
+      )
+    );
+      // 모달 닫기
+      setModalIsOpen(false);
     } catch (error) {
-      console.error('설문 제출 실패:', error);
+      console.error("설문 제출 실패:", error.message);
     }
+  };;
+  const formatDate = (dateString) => {
+    return dateString.split('T')[0]; // 'T'를 기준으로 나누고 첫 번째 부분(날짜)만 반환
   };
-
   const totalConsultings = consultingTotal;
   const latestConsulting = consultingHistory.length > 0
   ? consultingHistory[consultingHistory.length - 1].createdAt: '없음'; // 가장 최근의 컨설팅 날짜를 가져옵니다.  const nextConsulting = '없음';
@@ -274,15 +300,20 @@ export const ConsultingHistory = () => {
               <Text>날짜</Text>
               <Text>피드백</Text>
             </TableHeader>
-            {consultingHistory.map((consulting,index) => (
-              <TableRow key={consulting.id}>
+            {consultingHistory.map((consulting, index) => (
+            <TableRow 
+              key={consulting.id}
+              onClick={() => handleViewReport(consulting.consultingIndex)}  // 행 클릭 시 컨설팅 페이지로 이동
+            >
                 <Text>{index + 1}</Text>
                 <Text bold>{index + 1}회차 컨설팅 결과</Text>
-                <Text>{consulting.createdAt}</Text>
+                <Text>{formatDate(consulting.createdAt)}</Text>
                 <FeedbackStatus 
                   isCompleted={consulting.feedbackStatus}
-                  onClick={() => handleFeedbackClick(consulting)}
-                >
+                  onClick={(e) => {
+                    e.stopPropagation(); // 이벤트 전파 중지
+                    handleFeedbackClick(consulting);
+                  }}                >
                   {consulting.feedbackStatus ? '피드백 완료' : '피드백 미완료'}
                 </FeedbackStatus>
               </TableRow>
@@ -304,7 +335,7 @@ export const ConsultingHistory = () => {
             • 총 진행 횟수: {totalConsultings}회
           </Text>
           <Text style={{ marginBottom: '8px' }}>
-            • 최근 컨설팅: {latestConsulting}
+            • 최근 컨설팅: {formatDate(latestConsulting)}
           </Text>
           <Text>
             • 다음 예정 컨설팅: {nextConsulting}
@@ -427,9 +458,9 @@ export const ConsultingHistory = () => {
                 placeholder="추가적으로 다루고 싶은 점을 입력해주세요."
               />
               </Section>
-            <SubmitButton onClick={() => createSurvey(3)}>
-              제출
-            </SubmitButton>
+              <SubmitButton onClick={handleSubmit}>
+                제출
+              </SubmitButton>
           </FeedbackForm>
         </FeedbackModal>
       </Modal>
