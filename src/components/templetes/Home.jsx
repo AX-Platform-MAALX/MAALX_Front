@@ -1,10 +1,9 @@
 import { Stack, Grid, useTheme } from '@mui/system';
 
-
 export const Home = () => {
 	const theme = useTheme();
 	return (
-		<div class Name="main">
+		<div className="main">
 			<img className="App-header" src="/images/MainImg.png" width="90%"
 			style={{
 				display: 'block',
@@ -29,7 +28,7 @@ export const Home = () => {
 				AI Solutions<br/>
 				for a Smarter Tomorrow
 			</div>
-			<div class="Sub">
+			<div className="Sub">
 			<img className="App-SubTitle" src="/images/SubTitle.png" 
 			style={{
 					width:'auto',

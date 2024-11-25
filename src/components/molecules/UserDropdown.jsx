@@ -43,26 +43,37 @@ const DropdownItem = styled.div`
 export const UserDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  const isLoggedIn = localStorage.getItem('token') !== null;
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('user');
     navigate('/login');
+    setIsOpen(false);
   };
+
+  if (!isLoggedIn) {
+    return (
+      <DropdownButton onClick={() => navigate('/login')}>
+        로그인
+      </DropdownButton>
+    );
+  }
 
   return (
     <DropdownContainer>
       <DropdownButton onClick={() => setIsOpen(!isOpen)}>
-        <span>내 계정</span>
-        <span>▼</span>
+        <img 
+          src="/images/profile.png" 
+          alt="Profile" 
+          style={{ width: '24px', height: '24px', borderRadius: '50%' }} 
+        />
       </DropdownButton>
-      
       <DropdownMenu isOpen={isOpen}>
         <DropdownItem onClick={() => navigate('/mypage')}>마이페이지</DropdownItem>
-        <DropdownItem onClick={() => navigate('/consulting-history')}>컨설팅 기록</DropdownItem>
         <DropdownItem onClick={handleLogout}>로그아웃</DropdownItem>
       </DropdownMenu>
     </DropdownContainer>
   );
-}; 
+};
