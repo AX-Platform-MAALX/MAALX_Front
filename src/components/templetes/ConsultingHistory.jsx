@@ -40,6 +40,7 @@ const TableRow = styled.div`
 	border-bottom: 1px solid #e5e5e5;
 	align-items: center;
 	gap: 80px;
+	cursor: pointer;
 
 	&:last-child {
 		border-bottom: none;
@@ -166,7 +167,7 @@ export const ConsultingHistory = () => {
 				if (!response.ok) {
 					throw new Error(`HTTP error! status: ${response.status}`);
 				}
-console.log('Response:', response);
+				console.log('Response:', response);
 				const data = await response.json();
 				console.log('Received data:', data);
 
