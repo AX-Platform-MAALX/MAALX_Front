@@ -27,14 +27,6 @@ const Tab = styled.button`
     cursor: pointer;
 `;
 
-const PDFButton = styled(Button)`
-    background-color: #f5f5f5;
-    color: #000;
-    &:hover {
-        background-color: #e5e5e5;
-    }
-`;
-
 const Input = styled.input`
     padding: 8px 12px;
     border: 1px solid #ccc;
@@ -144,7 +136,6 @@ export const ConsultingPage = () => {
                         전문
                     </Tab>
                 )}
-                <PDFButton>PDF 다운로드</PDFButton>
             </TabContainer>
 
             <ResultContainer style={{ width: '700px'}}> {/* 여기서 가로 길이를 고정 */}

@@ -123,7 +123,18 @@ export const MyPage = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem('token'); 
   const [userData, setUserData] = useState(null);
-  const [modalIsOpen, setModalIsOpen] = useState(false);  // 모달 상태 관리
+  const [additionalInfo, setAdditionalInfo] = useState({
+    companyName: "",
+    industry: "",
+    revenue: null,
+    painPoint: "",
+    detailedIssue: "",
+    consultingField: "",
+    aiNeeds: "",
+    detailedDemand: "",
+    date: null,
+  });
+    const [modalIsOpen, setModalIsOpen] = useState(false);  // 모달 상태 관리
   const [selectedPlan, setSelectedPlan] = useState('Basic'); // 기본값은 'Basic'으로 설정
   const [consultingHistory, setConsultingHistory] = useState([]);
   const [consultingTotal, setConsultingTotal] = useState(0); // total을 상태로 관리
@@ -205,6 +216,37 @@ export const MyPage = () => {
       console.error('회원 상태 변경 실패:', error);
     }
   };
+  // getAdditionalInfo API 호출 추가
+  useEffect(() => {
+    const fetchAdditionalInfo = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/user/additional', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        if (!response.ok) {
+          throw new Error('추가 정보를 가져오는 데 실패했습니다.');
+        }
+        const data = await response.json();
+        setAdditionalInfo(data);  // 받은 추가 정보로 상태 업데이트
+        localStorage.setItem("additionalInfo", JSON.stringify(data)); // 로컬스토리지 저장
+      } catch (error) {
+        console.error(error.message);
+      }
+    };
+
+    // 로컬스토리지에 데이터가 있으면 우선 로드, 없으면 fetch 실행
+    const storedData = localStorage.getItem("additionalInfo");
+    if (storedData) {
+      setAdditionalInfo(JSON.parse(storedData));
+    } else {
+      fetchAdditionalInfo();
+    }
+  }, [token]);
+  
   // 모달 열기
   const openModal = () => {
     console.log('요금제 변경 버튼 클릭됨');
@@ -335,6 +377,78 @@ export const MyPage = () => {
             style={{ padding: '10px', marginTop: '20px', backgroundColor: '#2F56C7', color: '#fff', border: 'none', borderRadius: '4px' }}>변경</button>
         </div>
       </Modal>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center', // 가로 방향 중앙 정렬
+          alignItems: 'flex-start', // 세로 정렬 기준을 상단으로
+          marginTop: '20px', // 상단 여백 조정
+        }}
+      >      {/* 첫 번째 테이블: 기본정보 */}
+      <div style={{ marginRight: '50px' }}>
+      <h3 style={{fontWeight: 'bold' }}>1. 기본정보</h3>
+      <table
+          style={{
+            borderCollapse: 'collapse',
+            width: '300px', // 고정된 테이블 너비 설정
+            margin: '0 auto', // 테이블 자체를 가로 중앙 정렬
+            marginTop:'10px'
+          }}
+        >
+          <tbody>
+            <tr>
+              <td style={{ border: '1px solid #ccc', padding: '8px' }}>사명</td>
+              <td style={{ border: '1px solid #ccc', padding: '8px'}}>{additionalInfo.companyName}</td>
+            </tr>
+            <tr>
+              <td style={{ border: '1px solid #ccc', padding: '8px' }}>사업분야</td>
+              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{additionalInfo.industry}</td>
+            </tr>
+            <tr>
+              <td style={{ border: '1px solid #ccc', padding: '8px' }}>매출액(최근3년)</td>
+              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{additionalInfo.revenue}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* 두 번째 테이블: 부가정보 */}
+      <div>
+      <h3 style={{fontWeight: 'bold' }}>2. 부가정보</h3>
+        <table
+          style={{
+            borderCollapse: 'collapse',
+            width: '500px', // 고정된 테이블 너비 설정
+            margin: '0 auto', // 테이블 자체를 가로 중앙 정렬
+            marginTop:'10px'
+          }}
+        >
+          <tbody>
+            <tr>
+              <td style={{ border: '1px solid #ccc', padding: '8px' }}>Painpoint</td>
+              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{additionalInfo.painPoint}</td>
+            </tr>
+            <tr>
+              <td style={{ border: '1px solid #ccc', padding: '8px' }}>Detailed issue</td>
+              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{additionalInfo.detailedIssue}</td>
+            </tr>
+            <tr>
+              <td style={{ border: '1px solid #ccc', padding: '8px' }}>Consulting Field</td>
+              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{additionalInfo.consultingField}</td>
+            </tr>
+            <tr>
+              <td style={{ border: '1px solid #ccc', padding: '8px' }}>Ai needs</td>
+              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{additionalInfo.aiNeeds}</td>
+            </tr>
+            <tr>
+              <td style={{ border: '1px solid #ccc', padding: '8px' }}>Detailed demand</td>
+              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{additionalInfo.detailedDemand}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
       {/* 컨설팅 내역 섹션 추가 */}
       <ConsultingSection>
         <Text bold fontSize="16px" style={{ marginBottom: '16px', textAlign: 'left' }}>
