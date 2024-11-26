@@ -1,4 +1,4 @@
-import { Stack, useTheme } from '@mui/system';
+import { Stack, useTheme } from '@mui/material';
 import { Text } from '../atoms/index.js';
 import styled from '@emotion/styled';
 import { useState, useEffect } from 'react';

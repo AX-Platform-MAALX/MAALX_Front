@@ -1,8 +1,9 @@
-import { Stack, useTheme } from '@mui/system';
+import { Stack, useTheme } from '@mui/material';
 import { Button, Text } from '../components/atoms/index.js';
 import styled from '@emotion/styled';
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom'; // useParams를 import
+import { marked } from 'marked';
 
 const ResultContainer = styled.div`
     padding: 20px;
@@ -10,6 +11,47 @@ const ResultContainer = styled.div`
     border-radius: 8px;
     background-color: #fff;
     width: 100%;
+
+    h1, h2, h3 {
+        margin-top: 24px;
+        margin-bottom: 16px;
+        font-weight: 600;
+        line-height: 1.25;
+    }
+
+    h1 {
+        font-size: 2em;
+        padding-bottom: 0.3em;
+        border-bottom: 1px solid #eee;
+    }
+
+    h2 {
+        font-size: 1.5em;
+        padding-bottom: 0.3em;
+        border-bottom: 1px solid #eee;
+    }
+
+    h3 {
+        font-size: 1.25em;
+    }
+
+    p {
+        margin-bottom: 16px;
+        line-height: 1.6;
+    }
+
+    ul, ol {
+        padding-left: 2em;
+        margin-bottom: 16px;
+    }
+
+    li {
+        margin-bottom: 8px;
+    }
+
+    strong {
+        font-weight: 600;
+    }
 `;
 
 const TabContainer = styled.div`
@@ -68,6 +110,7 @@ export const ConsultingPage = () => {
     const [userPlan, setUserPlan] = useState('Basic');
     const [consultingHistory, setConsultingHistory] = useState([]);
     const [selectedResponseContent, setSelectedResponseContent] = useState(""); // responseContent 상태 추가
+    const [consultingResult, setConsultingResult] = useState('');
 
     useEffect(() => {
         // localStorage에서 컨설팅 데이터와 사용자 요금제 정보 가져오기
@@ -96,7 +139,32 @@ export const ConsultingPage = () => {
         }
     }, [consultingIndex]); // consultingIndex가 변경될 때마다 호출
 
+    useEffect(() => {
+        const fetchConsultingResult = async () => {
+            try {
+                const response = await fetch(`http://localhost:8080/consulting/${consultingIndex}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch consulting result');
+                }
 
+                const data = await response.json();
+                // marked 라이브러리를 사용하여 마크다운을 HTML로 변환
+                const htmlContent = marked(data.prediction);
+                setConsultingResult(htmlContent);
+            } catch (error) {
+                console.error('Error fetching consulting result:', error);
+            }
+        };
+
+        if (consultingIndex) {
+            fetchConsultingResult();
+        }
+    }, [consultingIndex]);
 
     const renderBasicContent = () => (
         <Stack spacing={2}>
@@ -138,6 +206,13 @@ export const ConsultingPage = () => {
                 )}
             </TabContainer>
 
+            <ResultContainer 
+                dangerouslySetInnerHTML={{ __html: consultingResult }}
+                style={{ 
+                    fontSize: '16px',
+                    lineHeight: '1.6'
+                }}
+            />
             <ResultContainer style={{ width: '700px'}}> {/* 여기서 가로 길이를 고정 */}
                 {activeTab === '요약본' ? renderBasicContent() : renderProContent()}
             </ResultContainer>

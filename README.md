@@ -39,6 +39,27 @@ Instead, it will copy all the configuration files and the transitive dependencie
 
 You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
+## 설치 방법
+
+1. 저장소 복제
+```bash
+git clone [repository-url]
+cd MAALX_Front
+```
+2. 의존성 설치
+```bash
+npm install
+```
+3. 개발 서버 실행
+```bash
+npm start
+```
+## 최근 업데이트 (2024.01)
+
+- 컨설팅 결과 표시 방식 개선: JSON에서 HTML 형식으로 변경
+- MUI 패키지 버전 업데이트 및 의존성 최적화
+- 스타일링 개선 및 버그 수정
+
 ## Learn More
 
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
