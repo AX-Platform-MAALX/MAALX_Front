@@ -4,6 +4,7 @@ import styled from '@emotion/styled';
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom'; // useParams를 import
 import { marked } from 'marked';
+import html2pdf from 'html2pdf.js';
 
 const ResultContainer = styled.div`
     padding: 20px;
@@ -56,17 +57,33 @@ const ResultContainer = styled.div`
 
 const TabContainer = styled.div`
     display: flex;
-    gap: 8px;
+    gap: 10px;
     margin-bottom: 20px;
 `;
 
 const Tab = styled.button`
     padding: 8px 16px;
     border: none;
+    background-color: ${props => props.active ? '#1976d2' : '#f5f5f5'};
+    color: ${props => props.active ? 'white' : 'black'};
     border-radius: 4px;
-    background-color: ${props => props.active ? '#2f56c7' : '#f5f5f5'};
-    color: ${props => props.active ? '#fff' : '#000'};
     cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+
+    &:hover {
+        background-color: ${props => props.active ? '#1976d2' : '#e0e0e0'};
+    }
+`;
+
+const PdfButton = styled(Tab)`
+    margin-left: auto;  // 오른쪽 정렬
+    background-color: #1976d2;
+    color: white;
+
+    &:hover {
+        background-color: #1565c0;
+    }
 `;
 
 const Input = styled.input`
@@ -166,6 +183,19 @@ export const ConsultingPage = () => {
         }
     }, [consultingIndex]);
 
+    const generatePDF = () => {
+        const content = document.querySelector('#consulting-content');
+        const opt = {
+            margin: 1,
+            filename: 'consulting_report.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+
+        html2pdf().set(opt).from(content).save();
+    };
+
     const renderBasicContent = () => {
         let parsedContent = "";
         try {
@@ -240,7 +270,8 @@ export const ConsultingPage = () => {
             <TabContainer>
                 <Tab 
                     active={activeTab === '요약본'} 
-                    onClick={() => setActiveTab('요약본')}                >
+                    onClick={() => setActiveTab('요약본')}
+                >
                     요약본
                 </Tab>
                 {userPlan === 'Pro' && (
@@ -251,9 +282,12 @@ export const ConsultingPage = () => {
                         전문
                     </Tab>
                 )}
+                <PdfButton onClick={generatePDF}>
+                    PDF
+                </PdfButton>
             </TabContainer>
 
-            <ResultContainer style={{ width: '700px'}}> 
+            <ResultContainer id="consulting-content" style={{ width: '700px'}}> 
                 {activeTab === '요약본' ? renderBasicContent() : renderProContent()}
             </ResultContainer>
         </Stack>
