@@ -3,7 +3,7 @@ import { Button, Text } from '../components/atoms/index.js';
 import styled from '@emotion/styled';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { RadioGroup, FormControlLabel, Radio } from '@mui/material';
+import { RadioGroup, FormControlLabel, Radio,TextField } from '@mui/material';
 import { Modal, Box, CircularProgress } from '@mui/material';
 
 const Title = styled.div`
@@ -65,6 +65,10 @@ export const ServiceInfoPage = () => {
     const [aiNeeds, setAiNeeds] = useState('');
     const [detailedDemand, setDetailedDemand] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+	const [otherIndustry, setOtherIndustry] = useState('');
+    const [otherPainpoint, setOtherPainpoint] = useState('');
+    const [otherConsultingField, setOtherConsultingField] = useState('');
+    const [otherAiNeeds, setOtherAiNeeds] = useState('');
 
     const handleSubmit = async () => {
         setIsLoading(true); // 로딩 시작
@@ -74,11 +78,11 @@ export const ServiceInfoPage = () => {
             
             const consultingData = {
                 companyName,
-                industry,
+                industry: industry === '기타' ? otherIndustry.trim() : industry,
                 revenue: parsedRevenue,
-                painPoint,
+                painPoint: painPoint ==='기타'?otherPainpoint.trim():painPoint,
                 detailedIssue,
-                consultingField,
+                consultingField:consultingField==='기타'?otherConsultingField.trim():consultingField,
                 aiNeeds,
                 detailedDemand
             };
@@ -189,7 +193,19 @@ export const ServiceInfoPage = () => {
                                 <FormControlLabel value="제조업" control={<Radio />} label="제조업"/>
                                 <FormControlLabel value="서비스업" control={<Radio />} label="서비스업"/>
                                 <FormControlLabel value="정보통신업" control={<Radio />} label="정보통신업"/>
+                                <FormControlLabel value="기타" label="기타" control={<Radio />} />
                             </RadioGroup>
+                            {industry === '기타' && (
+								<TextField
+									label="사업분야를 입력해주세요"
+									variant="outlined"
+									fullWidth
+									multiline
+									rows={4}
+									value={otherIndustry}
+									onChange={(e) => setOtherIndustry(e.target.value)}
+								/>
+							)}
                         </SubSection>
                         <SubSection>
                             <Text bold>1-3. 매출액(최근 3년)</Text>
@@ -218,7 +234,19 @@ export const ServiceInfoPage = () => {
                                 <FormControlLabel value="경영진의 AI 지식 부족" control={<Radio />} label="경영진의 AI 지식 부족"/>
                                 <FormControlLabel value="조직내 저항" control={<Radio />} label="조직내 저항"/>
                                 <FormControlLabel value="AX 전략 수립의 어려움" control={<Radio />} label="AX 전략 수립의 어려움"/>
+                                <FormControlLabel value="기타" label="기타" control={<Radio />} />
                             </RadioGroup>
+                            {painPoint === '기타' && (
+								<TextField
+									label="기타 사항을 입력해주세요"
+									variant="outlined"
+									fullWidth
+									multiline
+									rows={4}
+									value={otherPainpoint}
+									onChange={(e) => setOtherPainpoint(e.target.value)}
+								/>
+							)}
                         </SubSection>
                         <SubSection>
                             <Text bold>2-2. detailed issue</Text>
@@ -237,7 +265,19 @@ export const ServiceInfoPage = () => {
                             >
                                 <FormControlLabel value="AX 방법론용" control={<Radio />} label="AX 방법론"/>
                                 <FormControlLabel value="비즈니스 혁신 및 인사이트 분석" control={<Radio />} label="비즈니스 혁신 및 인사이트 분석"/>
+                                <FormControlLabel value="기타" label="기타" control={<Radio />} />
                             </RadioGroup>
+                            {consultingField === '기타' && (
+								<TextField
+									label="기타 사항을 입력해주세요"
+									variant="outlined"
+									fullWidth
+									multiline
+									rows={4}
+									value={otherConsultingField}
+									onChange={(e) => setOtherConsultingField(e.target.value)}
+								/>
+							)}                        
                         </SubSection>
                         <SubSection>
                             <Text bold>2-4. ai needs</Text>
@@ -249,8 +289,19 @@ export const ServiceInfoPage = () => {
                                 <FormControlLabel value="AI 챗봇 및 고객 지원 자동화" control={<Radio />} label="AI 챗봇 및 고객 지원 자동화"/>
                                 <FormControlLabel value="업무 자동화" control={<Radio />} label="업무 자동화"/>
                                 <FormControlLabel value="AI 응용 제품 및 서비스 개발" control={<Radio />} label="AI 응용 제품 및 서비스 개발"/>
+                                <FormControlLabel value="기타" label="기타" control={<Radio />} />
                             </RadioGroup>
-                        </SubSection>
+                            {aiNeeds === '기타' && (
+								<TextField
+									label="기타 사항을 입력해주세요"
+									variant="outlined"
+									fullWidth
+									multiline
+									rows={4}
+									value={otherAiNeeds}
+									onChange={(e) => setOtherAiNeeds(e.target.value)}
+								/>
+							)}                        </SubSection>
                         <SubSection>
                             <Text bold>2-5. detailed demand</Text>
                             <TextArea

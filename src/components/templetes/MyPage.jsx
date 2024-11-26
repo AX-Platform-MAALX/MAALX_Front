@@ -248,8 +248,8 @@ export const MyPage = () => {
         console.error(error.message);
       }
     };
-
-    const storedData = localStorage.getItem('additionalInfo');
+    // 로컬스토리지에 데이터가 있으면 우선 로드, 없으면 fetch 실행
+    const storedData = localStorage.getItem("additionalInfo");
     if (storedData) {
       setAdditionalInfo(JSON.parse(storedData));
     } else {
@@ -257,6 +257,7 @@ export const MyPage = () => {
     }
   }, [token]);
 
+  // 모달 열기
   const openModal = () => {
     console.log('요금제 변경 버튼 클릭됨');
     setModalIsOpen(true);
