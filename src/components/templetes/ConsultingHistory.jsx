@@ -362,7 +362,6 @@ console.log('Response:', response);
 					</Text>
 					<Text style={{ marginBottom: '8px' }}>• 총 진행 횟수: {totalConsultings}회</Text>
 					<Text style={{ marginBottom: '8px' }}>• 최근 컨설팅: {formatDate(latestConsulting)}</Text>
-					<Text>• 다음 예정 컨설팅: {nextConsulting}</Text>
 				</ConsultingSection>
 			</Stack>
 			<Modal
