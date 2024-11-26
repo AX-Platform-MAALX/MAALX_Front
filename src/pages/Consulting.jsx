@@ -226,14 +226,7 @@ export const ConsultingPage = () => {
                 )}
             </TabContainer>
 
-            <ResultContainer 
-                dangerouslySetInnerHTML={{ __html: consultingResult }}
-                style={{ 
-                    fontSize: '16px',
-                    lineHeight: '1.6'
-                }}
-            />
-            <ResultContainer style={{ width: '700px'}}> {/* 여기서 가로 길이를 고정 */}
+            <ResultContainer style={{ width: '700px'}}> 
                 {activeTab === '요약본' ? renderBasicContent() : renderProContent()}
             </ResultContainer>
         </Stack>
