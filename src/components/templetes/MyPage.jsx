@@ -177,7 +177,6 @@ export const MyPage = () => {
       const revenueData = consultingHistory.map((item, index) => ({
         name: `${index + 1}회차 컨설팅`, // 1회차, 2회차 등
         value: item.revenue,  // revenue 값 사용
-        line: item.revenue  // 선형 그래프에 동일한 값 사용
       }));
       setChartData(revenueData); // 차트 데이터 업데이트
     } catch (error) {
