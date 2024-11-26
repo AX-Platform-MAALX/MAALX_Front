@@ -186,6 +186,10 @@ export const ConsultingPage = () => {
     }, [consultingIndex]);
     const generatePDF = () => {
         const content = document.querySelector('#consulting-content');
+        // 콘텐츠 크기 조정 (예: 내용이 페이지에 맞도록 크기를 변경)
+        content.style.fontSize = '14px'; // 글씨 크기 조정
+        content.style.width = '100%'; // 콘텐츠의 너비를 페이지에 맞게 설정
+        content.style.margin = '0'; // 불필요한 마진 제거
         const opt = {
             margin: 1,
             filename: 'consulting_report.pdf',
@@ -264,7 +268,6 @@ export const ConsultingPage = () => {
         );
     };
     const openModal = () => {
-        console.log("전문");
         setModalIsOpen(true);
     };
     
@@ -318,7 +321,7 @@ export const ConsultingPage = () => {
             </TabContainer>
 
 
-            <ResultContainer style={{ width: "700px" }}>
+            <ResultContainer id="consulting-content" style={{ width: "700px" }}>
                 {userPlan === "Basic" && activeTab === "요약본" && renderBasicContent()}
                 {userPlan === "Pro" && activeTab === "전문" && renderProContent()}
             </ResultContainer>
