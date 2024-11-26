@@ -166,11 +166,39 @@ export const ConsultingPage = () => {
         }
     }, [consultingIndex]);
 
-    const renderBasicContent = () => (
-        <Stack spacing={2}>
+    const renderBasicContent = () => {
+        let parsedContent = "";
+        try {
+            const contentObj = JSON.parse(selectedResponseContent);
+            const fullContent = contentObj.prediction || selectedResponseContent;
             
-        </Stack>
-    );
+            // 서론 부분만 추출 (### 1. 서론 부터 다음 ### 까지)
+            const introMatch = fullContent.match(/### 1\. 서론([\s\S]*?)(?=###|$)/);
+            if (introMatch) {
+                parsedContent = `## ${fullContent.split('\n')[0]}\n${introMatch[0]}`; // 제목 + 서론
+            } else {
+                parsedContent = fullContent; // 매칭되는 부분이 없으면 전체 내용 표시
+            }
+            
+            // 마크다운을 HTML로 변환
+            parsedContent = marked(parsedContent);
+        } catch (e) {
+            parsedContent = selectedResponseContent;
+        }
+
+        return (
+            <Stack spacing={2}>
+                <div 
+                    dangerouslySetInnerHTML={{ __html: parsedContent }}
+                    style={{ 
+                        fontSize: '16px',
+                        lineHeight: '1.6',
+                        '& p': { marginBottom: '1em' }
+                    }}
+                />
+            </Stack>
+        );
+    };
 
     const renderProContent = () => {
         // JSON 문자열을 파싱하여 prediction 필드 추출
