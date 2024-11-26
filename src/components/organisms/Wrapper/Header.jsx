@@ -61,6 +61,7 @@ export const Header = () => {
     localStorage.removeItem('consultingHistory');
     localStorage.removeItem('userPlan');
     localStorage.removeItem('consultingData');
+    localStorage.removeItem('additionalInfo');
 
     setIsLoggedIn(false);
     navigate('/');
