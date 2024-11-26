@@ -172,12 +172,32 @@ export const ConsultingPage = () => {
         </Stack>
     );
 
-    const renderProContent = () => (
-        <Stack spacing={3}>
-            <Text bold fontSize="18px">[전문]</Text>
-            <Text>{selectedResponseContent}</Text> {/* 전체 내용 표시 */}
-        </Stack>
-    );
+    const renderProContent = () => {
+        // JSON 문자열을 파싱하여 prediction 필드 추출
+        let parsedContent = "";
+        try {
+            const contentObj = JSON.parse(selectedResponseContent);
+            parsedContent = contentObj.prediction || selectedResponseContent;
+            // 마크다운을 HTML로 변환
+            parsedContent = marked(parsedContent);
+        } catch (e) {
+            parsedContent = selectedResponseContent;
+        }
+
+        return (
+            <Stack spacing={3}>
+                <Text bold fontSize="18px">[전문]</Text>
+                <div 
+                    dangerouslySetInnerHTML={{ __html: parsedContent }}
+                    style={{ 
+                        fontSize: '16px',
+                        lineHeight: '1.6',
+                        '& p': { marginBottom: '1em' }
+                    }}
+                />
+            </Stack>
+        );
+    };
 
     return (
         <Stack 
