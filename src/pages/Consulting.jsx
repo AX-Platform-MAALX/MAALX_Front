@@ -1,8 +1,8 @@
-import { Stack, useTheme } from '@mui/material';
+import { Box, Stack, useTheme,Modal } from '@mui/material';
 import { Button, Text } from '../components/atoms/index.js';
 import styled from '@emotion/styled';
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom'; // useParams를 import
+import { useParams,useNavigate} from 'react-router-dom'; // useParams를 import
 import { marked } from 'marked';
 import html2pdf from 'html2pdf.js';
 
@@ -122,12 +122,14 @@ const SubSection = styled(Stack)`
 
 export const ConsultingPage = () => {
     const theme = useTheme();
+    const navigate = useNavigate(); // navigate 훅 사용
     const [activeTab, setActiveTab] = useState('요약본');
     const { consultingIndex } = useParams(); // URL에서 consultingIndex 추출
     const [userPlan, setUserPlan] = useState('Basic');
     const [consultingHistory, setConsultingHistory] = useState([]);
     const [selectedResponseContent, setSelectedResponseContent] = useState(""); // responseContent 상태 추가
     const [consultingResult, setConsultingResult] = useState('');
+    const [modalIsOpen, setModalIsOpen] = useState(false);
 
     useEffect(() => {
         // localStorage에서 컨설팅 데이터와 사용자 요금제 정보 가져오기
@@ -182,7 +184,6 @@ export const ConsultingPage = () => {
             fetchConsultingResult();
         }
     }, [consultingIndex]);
-
     const generatePDF = () => {
         const content = document.querySelector('#consulting-content');
         const opt = {
@@ -195,6 +196,13 @@ export const ConsultingPage = () => {
 
         html2pdf().set(opt).from(content).save();
     };
+
+    // Pro 요금제일 경우, activeTab을 '전문'으로 설정
+    useEffect(() => {
+        if (userPlan === 'Pro') {
+            setActiveTab('전문');
+        }
+    }, [userPlan])
 
     const renderBasicContent = () => {
         let parsedContent = "";
@@ -255,7 +263,17 @@ export const ConsultingPage = () => {
             </Stack>
         );
     };
-
+    const openModal = () => {
+        console.log("전문");
+        setModalIsOpen(true);
+    };
+    
+    const closeModal = () => {
+        setModalIsOpen(false);
+    };
+    const handleUpgradeClick = () => {
+        navigate('/mypage'); // MyPage로 이동
+    };
     return (
         <Stack 
             spacing={theme.spacing(3)} 
@@ -268,16 +286,28 @@ export const ConsultingPage = () => {
             <Text bold style={{fontSize:"24px"}}>컨설팅 결과</Text>
             
             <TabContainer>
-                <Tab 
-                    active={activeTab === '요약본'} 
-                    onClick={() => setActiveTab('요약본')}
-                >
-                    요약본
-                </Tab>
-                {userPlan === 'Pro' && (
-                    <Tab 
-                        active={activeTab === '전문'} 
-                        onClick={() => setActiveTab('전문')}
+                {userPlan === "Basic" && (
+                    <>
+                        {/* 요약본 버튼 */}
+                        <Tab
+                            active={activeTab === "요약본"}
+                            onClick={() => setActiveTab("요약본")}
+                        >
+                            요약본
+                        </Tab>
+                        {/* 전문 버튼 */}
+                        <Tab
+                            active={activeTab === "전문"}
+                            onClick={openModal}
+                        >
+                            전문
+                        </Tab>
+                    </>
+                )}
+                {userPlan === "Pro" && (
+                    <Tab
+                        active={activeTab === "전문"}
+                        onClick={() => setActiveTab("전문")} // Pro 요금제에서 클릭 시 전문 내용 표시
                     >
                         전문
                     </Tab>
@@ -287,9 +317,33 @@ export const ConsultingPage = () => {
                 </PdfButton>
             </TabContainer>
 
-            <ResultContainer id="consulting-content" style={{ width: '700px'}}> 
-                {activeTab === '요약본' ? renderBasicContent() : renderProContent()}
+
+            <ResultContainer style={{ width: "700px" }}>
+                {userPlan === "Basic" && activeTab === "요약본" && renderBasicContent()}
+                {userPlan === "Pro" && activeTab === "전문" && renderProContent()}
             </ResultContainer>
+
+            <Modal open={modalIsOpen} onClose={closeModal}>
+                <Box
+                    sx={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                        width: 400,
+                        bgcolor: "background.paper",
+                        boxShadow: 24,
+                        p: 4,
+                        borderRadius: "8px",
+                        textAlign: "center",
+                    }}
+                >
+                    <Text bold style={{ fontSize: "20px",marginBottom:'10px'}}>Pro 요금제 전용 기능입니다</Text>
+                    <p>전문 내용을 확인하려면<br/> Pro 요금제로 업그레이드하세요.</p>
+                    <Button style={{ fontSize: "15px",marginTop:'20px'}} onClick={handleUpgradeClick}>업그레이드 하러가기</Button>
+                </Box>
+            </Modal>
+
         </Stack>
     );
 };
