@@ -129,6 +129,8 @@ export const ConsultingHistory = () => {
 	const [addition, setAddition] = useState('');
 	const [otherSatisfaction, setOtherSatisfaction] = useState('');
 	const [otherDissatisfaction, setOtherDissatisfaction] = useState('');
+	const [draggedRowIndex, setDraggedRowIndex] = useState(null); // 드래그 상태 관리
+
 	Modal.setAppElement('#root');
 
 	useEffect(() => {
@@ -286,7 +288,19 @@ export const ConsultingHistory = () => {
 	const latestConsulting =
 		consultingHistory.length > 0 ? consultingHistory[consultingHistory.length - 1].createdAt : '없음'; // 가장 최근의 컨설팅 날짜를 가져옵니다.  const nextConsulting = '없음';
 	const nextConsulting = '없음';
+	const handleDragStart = (index) => {
+        setDraggedRowIndex(index); // 드래그 시작 시 인덱스 저장
+    };
 
+    const handleDragEnter = (index) => {
+        if (draggedRowIndex !== null) {
+            setDraggedRowIndex(index); // 드래그 중인 인덱스 업데이트
+        }
+    };
+
+    const handleDragEnd = () => {
+        setDraggedRowIndex(null); // 드래그 종료 후 상태 초기화
+    };
 	return (
 		<>
 			<Stack
