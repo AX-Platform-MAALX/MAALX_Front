@@ -83,7 +83,7 @@ export const ServiceInfoPage = () => {
                 painPoint: painPoint ==='기타'?otherPainpoint.trim():painPoint,
                 detailedIssue,
                 consultingField:consultingField==='기타'?otherConsultingField.trim():consultingField,
-                aiNeeds,
+                aiNeeds:aiNeeds==='기타'?otherAiNeeds.trim():aiNeeds,
                 detailedDemand
             };
 
