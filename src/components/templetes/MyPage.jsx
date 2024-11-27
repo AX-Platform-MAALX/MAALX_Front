@@ -456,7 +456,7 @@ export const MyPage = () => {
               </tr>
               <tr>
                 <td style={{ border: '1px solid #ccc', padding: '8px' }}>Detailed issue</td>
-                <td style={{ border: '1px solid #ccc', padding: '8px' }}>
+                <td style={{ border: '1px solid #ccc', padding: '8px',lineHeight: '1.2'}}>
                   {additionalInfo.detailedIssue}
                 </td>
               </tr>
@@ -472,7 +472,7 @@ export const MyPage = () => {
               </tr>
               <tr>
                 <td style={{ border: '1px solid #ccc', padding: '8px' }}>Detailed demand</td>
-                <td style={{ border: '1px solid #ccc', padding: '8px' }}>
+                <td style={{ border: '1px solid #ccc', padding: '8px',lineHeight: '1.2' }}>
                   {additionalInfo.detailedDemand}
                 </td>
               </tr>
