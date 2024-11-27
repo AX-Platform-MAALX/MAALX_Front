@@ -212,7 +212,7 @@ export const ServiceInfoPage = () => {
                             <Input
                                 value={revenue}
                                 onChange={(e) => setRevenue(e.target.value)}
-                                placeholder="최근 3년 매출액을 입력해주세요"
+                                placeholder="최근 3년 평균 매출액을 입력해주세요"
                             />
                         </SubSection>
                     </Stack>
