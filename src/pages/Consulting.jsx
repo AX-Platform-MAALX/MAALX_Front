@@ -191,7 +191,7 @@ export const ConsultingPage = () => {
         content.style.width = '100%'; // 콘텐츠의 너비를 페이지에 맞게 설정
         content.style.margin = '0'; // 불필요한 마진 제거
         const opt = {
-            margin: 1,
+            margin: [1, 1, 2.2, 1], // 상, 좌, 하, 우 여백 설정 (하단 여백을 2인치로 설정)
             filename: 'consulting_report.pdf',
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2 },
