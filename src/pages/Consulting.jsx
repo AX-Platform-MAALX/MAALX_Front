@@ -130,6 +130,7 @@ export const ConsultingPage = () => {
     const [selectedResponseContent, setSelectedResponseContent] = useState(""); // responseContent 상태 추가
     const [consultingResult, setConsultingResult] = useState('');
     const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         // localStorage에서 컨설팅 데이터와 사용자 요금제 정보 가져오기
@@ -160,6 +161,7 @@ export const ConsultingPage = () => {
 
     useEffect(() => {
         const fetchConsultingResult = async () => {
+            setIsLoading(true);  // 로딩 시작
             try {
                 const response = await fetch(`http://localhost:8080/consulting/${consultingIndex}`, {
                     headers: {
@@ -177,6 +179,8 @@ export const ConsultingPage = () => {
                 setConsultingResult(htmlContent);
             } catch (error) {
                 console.error('Error fetching consulting result:', error);
+            } finally {
+                setIsLoading(false);  // 로딩 종료
             }
         };
 
@@ -185,20 +189,27 @@ export const ConsultingPage = () => {
         }
     }, [consultingIndex]);
     const generatePDF = () => {
+        setIsLoading(true);  // PDF 생성 시작할 때 로딩 표시
         const content = document.querySelector('#consulting-content');
-        // 콘텐츠 크기 조정 (예: 내용이 페이지에 맞도록 크기를 변경)
-        content.style.fontSize = '14px'; // 글씨 크기 조정
-        content.style.width = '100%'; // 콘텐츠의 너비를 페이지에 맞게 설정
-        content.style.margin = '0'; // 불필요한 마진 제거
+        content.style.fontSize = '14px';
+        content.style.width = '100%';
+        content.style.margin = '0';
+        
         const opt = {
-            margin: [1, 1, 2.2, 1], // 상, 좌, 하, 우 여백 설정 (하단 여백을 2인치로 설정)
+            margin: [1, 1, 2.2, 1],
             filename: 'consulting_report.pdf',
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2 },
             jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
         };
 
-        html2pdf().set(opt).from(content).save();
+        html2pdf()
+            .set(opt)
+            .from(content)
+            .save()
+            .then(() => {
+                setIsLoading(false);  // PDF 생성이 완료되면 로딩 숨김
+            });
     };
 
     // Pro 요금제일 경우, activeTab을 '전문'으로 설정
@@ -325,6 +336,37 @@ export const ConsultingPage = () => {
                 {userPlan === "Basic" && activeTab === "요약본" && renderBasicContent()}
                 {userPlan === "Pro" && activeTab === "전문" && renderProContent()}
             </ResultContainer>
+
+            <Modal open={isLoading} onClose={() => {}}>
+                <Box
+                    sx={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                        width: 400,
+                        bgcolor: "background.paper",
+                        boxShadow: 24,
+                        p: 4,
+                        borderRadius: "8px",
+                        textAlign: "center",
+                    }}
+                >
+                    <Text bold style={{ 
+                        fontSize: "28px", 
+                        marginBottom: '20px',
+                        color: '#1976d2'  // Material-UI의 파란색
+                    }}>
+                        리포트 생성중..
+                    </Text>
+                    <p style={{ 
+                        fontSize: "16px",
+                        color: '#666'  // 조금 더 연한 색상
+                    }}>
+                        1분 정도 소요됩니다
+                    </p>
+                </Box>
+            </Modal>
 
             <Modal open={modalIsOpen} onClose={closeModal}>
                 <Box

@@ -65,7 +65,7 @@ export const ServiceInfoPage = () => {
     const [aiNeeds, setAiNeeds] = useState('');
     const [detailedDemand, setDetailedDemand] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-	const [otherIndustry, setOtherIndustry] = useState('');
+    const [otherIndustry, setOtherIndustry] = useState('');
     const [otherPainpoint, setOtherPainpoint] = useState('');
     const [otherConsultingField, setOtherConsultingField] = useState('');
     const [otherAiNeeds, setOtherAiNeeds] = useState('');
@@ -158,7 +158,19 @@ export const ServiceInfoPage = () => {
                     gap: 2
                 }}>
                     <CircularProgress />
-                    <Text>기다리는 중...</Text>
+                    <Text bold style={{ 
+                        fontSize: "28px", 
+                        marginBottom: '20px',
+                        color: '#1976d2'  // Material-UI의 파란색
+                    }}>
+                        리포트 생성중..
+                    </Text>
+                    <p style={{ 
+                        fontSize: "16px",
+                        color: '#666'  // 조금 더 연한 색상
+                    }}>
+                        1분 정도 소요됩니다
+                    </p>
                 </Box>
             </Modal>
 
@@ -172,6 +184,7 @@ export const ServiceInfoPage = () => {
                     padding: theme.spacing(6)
                 }}
             >                     
+            
                 <Section>
                     <SectionTitle bold>1. 기본정보</SectionTitle>
                     <Stack spacing={2}>
@@ -196,16 +209,16 @@ export const ServiceInfoPage = () => {
                                 <FormControlLabel value="기타" label="기타" control={<Radio />} />
                             </RadioGroup>
                             {industry === '기타' && (
-								<TextField
-									label="사업분야를 입력해주세요"
-									variant="outlined"
-									fullWidth
-									multiline
-									rows={4}
-									value={otherIndustry}
-									onChange={(e) => setOtherIndustry(e.target.value)}
-								/>
-							)}
+                                <TextField
+                                    label="사업분야를 입력해주세요"
+                                    variant="outlined"
+                                    fullWidth
+                                    multiline
+                                    rows={4}
+                                    value={otherIndustry}
+                                    onChange={(e) => setOtherIndustry(e.target.value)}
+                                />
+                            )}
                         </SubSection>
                         <SubSection>
                             <Text bold>1-3. 매출액(최근 3년)</Text>
@@ -237,16 +250,16 @@ export const ServiceInfoPage = () => {
                                 <FormControlLabel value="기타" label="기타" control={<Radio />} />
                             </RadioGroup>
                             {painPoint === '기타' && (
-								<TextField
-									label="기타 사항을 입력해주세요"
-									variant="outlined"
-									fullWidth
-									multiline
-									rows={4}
-									value={otherPainpoint}
-									onChange={(e) => setOtherPainpoint(e.target.value)}
-								/>
-							)}
+                                <TextField
+                                    label="기타 사항을 입력해주세요"
+                                    variant="outlined"
+                                    fullWidth
+                                    multiline
+                                    rows={4}
+                                    value={otherPainpoint}
+                                    onChange={(e) => setOtherPainpoint(e.target.value)}
+                                />
+                            )}
                         </SubSection>
                         <SubSection>
                             <Text bold>2-2. detailed issue</Text>
@@ -268,16 +281,16 @@ export const ServiceInfoPage = () => {
                                 <FormControlLabel value="기타" label="기타" control={<Radio />} />
                             </RadioGroup>
                             {consultingField === '기타' && (
-								<TextField
-									label="기타 사항을 입력해주세요"
-									variant="outlined"
-									fullWidth
-									multiline
-									rows={4}
-									value={otherConsultingField}
-									onChange={(e) => setOtherConsultingField(e.target.value)}
-								/>
-							)}                        
+                                <TextField
+                                    label="기타 사항을 입력해주세요"
+                                    variant="outlined"
+                                    fullWidth
+                                    multiline
+                                    rows={4}
+                                    value={otherConsultingField}
+                                    onChange={(e) => setOtherConsultingField(e.target.value)}
+                                />
+                            )}                        
                         </SubSection>
                         <SubSection>
                             <Text bold>2-4. ai needs</Text>
@@ -292,16 +305,16 @@ export const ServiceInfoPage = () => {
                                 <FormControlLabel value="기타" label="기타" control={<Radio />} />
                             </RadioGroup>
                             {aiNeeds === '기타' && (
-								<TextField
-									label="기타 사항을 입력해주세요"
-									variant="outlined"
-									fullWidth
-									multiline
-									rows={4}
-									value={otherAiNeeds}
-									onChange={(e) => setOtherAiNeeds(e.target.value)}
-								/>
-							)}                        </SubSection>
+                                <TextField
+                                    label="기타 사항을 입력해주세요"
+                                    variant="outlined"
+                                    fullWidth
+                                    multiline
+                                    rows={4}
+                                    value={otherAiNeeds}
+                                    onChange={(e) => setOtherAiNeeds(e.target.value)}
+                                />
+                            )}                        </SubSection>
                         <SubSection>
                             <Text bold>2-5. detailed demand</Text>
                             <TextArea
